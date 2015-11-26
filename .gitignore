@@ -1,2 +1,7 @@
+### Pycharm Nonsense ###
+
 .idea/*
 .pyc
+
+### Large Files ###
+traj.nc
