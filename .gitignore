@@ -1,8 +1,13 @@
-### Pycharm Nonsense ###
+### Pycharm Nonsense and .pyc###
 
 .idea/*
-.pyc
+*.pyc
 
 ### Large Files ###
+
 traj.nc
 params.xml
+
+### Results and Tempfiles ###
+
+*.json
