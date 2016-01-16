@@ -8,7 +8,9 @@ v = 0.01
 v_max = 1
 v_inc = 0.01
 
-nconfig = 100
+run_info = (v, v_max, v_inc)
+
+nconfig = 5
 
 v_list = []
 w_means = []
@@ -21,7 +23,7 @@ breaks = 0
 
 while v < v_max:
 
-    t = DimerBreak(v, 0.002, nconfig, 0.0002, 0.0002, 1.2, "test")
+    t = DimerBreak(v, 0.002, nconfig, 0.000002, 0.000002, 1.2, "test",  run_info)
     w_mean, w_dev = t.run()
 
     results[v] = (w_mean, w_dev)
@@ -33,7 +35,7 @@ while v < v_max:
     v += v_inc
 
     breaks += 1
-    print(str(round((breaks/total_breaks)*100, 2)) + "   Complete.")
+    #print(str(round((breaks/total_breaks)*100, 2)) + "%   Complete.")
 
     with open(results_temp, 'w') as q:
         json.dump(results, q, indent=2)

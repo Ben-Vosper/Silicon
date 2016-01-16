@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.image as mpimg
-import os, json, statistics
+import os, json, statistics, time
 from pylab import *
 
 class DimerBreak:
 
-    def __init__(self, f_velocity, f_timestep, nconfig, f_optical, f_acoustic, stiffness_ratio, results_temp):
+    def __init__(self, f_velocity, f_timestep, nconfig, f_optical, f_acoustic, stiffness_ratio, results_temp, run_info):
 
         # (1) opening velocity will be a fraction frac of the speed of sound in LJ 1D Lattice
         self.frac_vel = f_velocity
@@ -34,6 +34,9 @@ class DimerBreak:
         print("brk dist: ", self.n_sigmas)
 
         self.results_temp = results_temp + "_" + str(self.frac_vel) + ".json"
+        self.run_info = run_info
+        self.total_runs = ((run_info[1] - run_info[0])/run_info[2])*nconfig
+        self.current_runs = (self.frac_vel/run_info[2])*nconfig
 
     def vdw(self, xdum, nat, sig, eps):
 
@@ -121,7 +124,11 @@ class DimerBreak:
 
         works = []
         for i_sample in range(0, self.nconfig):
-            print("iteration: ", i_sample)
+            #print("iteration: ", i_sample)
+
+            if i_sample == 0:
+                start_time = time.time()
+
             #---------equilibrium atoms positions
             for i in range(0,nat):
                 x0[i]=(-float(nat-1)/2.0 + sig*float(i))*(2.0**(1./6.0))
@@ -173,7 +180,7 @@ class DimerBreak:
             # estimated potential: -(eps[0]+eps[1]+eps[2]) + phonon energy
             e_est = 0.5*red_mass*w_opt**2*xopt**2 +0.5*aco_mass*w_aco**2*xaco**2
             epot,fc = self.vdw(x0,nat,sig,eps)
-            print("estimated and real epots: ",e_est,epot + (eps[0]+eps[1]+eps[2]))
+            #print("estimated and real epots: ",e_est,epot + (eps[0]+eps[1]+eps[2]))
 
             for i in range(1,7):  # iterative trick.
 
@@ -187,7 +194,7 @@ class DimerBreak:
                 x0[2] = x0[2]+xdtot[1]
 
                 epot,fc = self.vdw(x0,nat,sig,eps)
-                print("estimated and real epots: ",e_est,epot + (eps[0]+eps[1]+eps[2]))
+                #print("estimated and real epots: ",e_est,epot + (eps[0]+eps[1]+eps[2]))
 
             xm[1] = x0[1] + delxd[0]
             xm[2] = x0[2] + delxd[1]
@@ -277,11 +284,22 @@ class DimerBreak:
                 # or positive (in which case, initial oscillations -temperature- made the bond breaking more difficult)
                 # or zero (typical of zero initial oscillation and fracture at very low velocity)
 
-                if i%1000==1: print(("%6d"+"%12.8f"*6) % (i,ekin,epot,etot, work, etot + work, ekinotto))
+                #if i%1000==1: print(("%6d"+"%12.8f"*6) % (i,ekin,epot,etot, work, etot + work, ekinotto))
 
                 xm[:]=x0[:]
                 x0[:]=xp[:]
                 t = t + dt
+
+            if i_sample == 0:
+                end_time = time.time()
+                run_time = end_time - start_time
+
+            self.current_runs += 1
+
+            progress = (self.current_runs/self.total_runs)*100
+            est_time_remaining = round(((self.total_runs - self.current_runs)*run_time)/60, 2)
+
+            print(str(round(progress, 2)), ("%   Complete. Max time remaining = "), str(est_time_remaining), " Minutes.")
 
             works.append(ekinotto)
 
