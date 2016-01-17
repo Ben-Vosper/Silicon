@@ -33,7 +33,7 @@ class DimerBreak:
         self.n_sigmas = 7.0
         print("brk dist: ", self.n_sigmas)
 
-        self.results_temp = results_temp + "_" + str(self.frac_vel) + ".json"
+        self.results_temp = results_temp + "_" + str(round(self.frac_vel, 4)) + ".json"
         self.run_info = run_info
         self.total_runs = ((run_info[1] - run_info[0])/run_info[2])*nconfig
         self.current_runs = (self.frac_vel/run_info[2])*nconfig
@@ -301,10 +301,18 @@ class DimerBreak:
 
             print(str(round(progress, 2)), ("%   Complete. Max time remaining = "), str(est_time_remaining), " Minutes.")
 
-            works.append(ekinotto)
+            try:
+                with open(self.results_temp, 'rw') as q:
+                    works = json.load(q)
 
-            with open(self.results_temp, 'w') as q:
-                json.dump(works, q)
+                    works.append(ekinotto)
+
+                    json.dump(works, q)
+            except:
+                works.append(ekinotto)
+                with open(self.results_temp, 'w') as q:
+                    json.dump(works, q)
+
 
         os.remove(self.results_temp)
         return mean(works), statistics.stdev(works)
