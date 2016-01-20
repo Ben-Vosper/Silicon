@@ -20,6 +20,8 @@ def read_full_results_old(filename):
         w_errbar_size.append(results[v][1]/(nconfig**0.5))
 
     plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")
+    plt.xlabel("$\\frac{v}{v_s}$", size=24)
+    plt.ylabel("$\\bar W$ / $\epsilon$", size=18)
     plt.show()
 
 
@@ -42,6 +44,8 @@ def read_full_results(filename):
         w_errbar_size.append(results[v][1]/(nconfig**0.5))
 
     plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")
+    plt.xlabel("$\\frac{v}{v_s}$", size=24)
+    plt.ylabel("$\\bar W$ / $\epsilon$", size=18)
     plt.show()
 
-read_full_results("resume_test.json")
+read_full_results("Results\\highT_1.json")

@@ -11,3 +11,4 @@ params.xml
 ### Results and Tempfiles ###
 
 *.json
+Results/*

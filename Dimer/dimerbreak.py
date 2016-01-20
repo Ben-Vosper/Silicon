@@ -228,7 +228,7 @@ class DimerBreak:
 
             for i in range(1,nstep):
 
-                epot,fc = self.vdw(x0,nat,sig,eps)
+                epot, fc = self.vdw(x0,nat,sig,eps)
                 xp, dwork = self.verlet(x0,xm,dt,fc,mass,nat,vel)
 
                 work = work + dwork
