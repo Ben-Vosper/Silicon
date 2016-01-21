@@ -48,4 +48,4 @@ def read_full_results(filename):
     plt.ylabel("$\\bar W$ / $\epsilon$", size=18)
     plt.show()
 
-read_full_results("Results\\highT_1.json")
+read_full_results("Results\\opt0_aco0.1.json")

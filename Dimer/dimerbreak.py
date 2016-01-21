@@ -136,7 +136,7 @@ class DimerBreak:
 
             # PHONON SETUPS
 
-            en_opt = self.frac_opt**epsilon #---------energy of the opt phonon in units of epsilon
+            en_opt = self.frac_opt*epsilon #---------energy of the opt phonon in units of epsilon
             en_aco = self.frac_aco*epsilon #---------energy of the opt phonon in units of epsilon
 
             #-------------
@@ -315,4 +315,4 @@ class DimerBreak:
 
 
         os.remove(self.results_temp)
-        return mean(works), statistics.stdev(works)
+        return mean(works), statistics.pstdev(works)

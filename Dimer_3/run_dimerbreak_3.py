@@ -1,17 +1,17 @@
-from Dimer.dimerbreak import DimerBreak
+from Dimer_3.dimerbreak_3 import DimerBreak
 import matplotlib.pyplot as plt
 import json
 
-results_temp = "t.json"
+results_temp = "test.json"
 
 v = 0.05
 v_max = 1
-v_inc = 0.005
+v_inc = 0.01
 
 f_timestep = 0.002
-f_opt = 0.0000005
-f_aco = 0.1
-f_stiffness = 1.1
+f_opt = 0.00000000002
+f_aco = 0.00000000002
+f_stiffness = 1.2
 
 run_info = (v, v_max, v_inc)
 
@@ -29,7 +29,7 @@ breaks = 0
 
 while v < v_max:
 
-    t = DimerBreak(v, f_timestep, nconfig, f_opt, f_aco, f_stiffness, results_temp.replace(".json", ""),  run_info)
+    t = DimerBreak(v, f_timestep, nconfig, f_opt, f_aco, f_stiffness, "test",  run_info)
     w_mean, w_dev = t.run()
 
     results[v] = (w_mean, w_dev)

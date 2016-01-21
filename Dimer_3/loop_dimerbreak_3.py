@@ -11,9 +11,9 @@ from pylab import *
 #------- RUN PARAMETERS:
 # (1) opening velocity will be a fraction frac_vel of the speed of sound in LJ 1D Lattice
 # frac_vel will be in n_velocities steps up to dfrac_vel*n_velocities
-dfrac_vel    = 0.0025
-n_velocities = 15
-veloc_start  = 0.035
+dfrac_vel    = 0.01
+n_velocities = 100
+veloc_start  = 0.05
 
 print('max velocity:', dfrac_vel*float(n_velocities) )
 #
@@ -21,17 +21,17 @@ print('max velocity:', dfrac_vel*float(n_velocities) )
 # (2) energy of the optical and acoustic modes as a fraction of the LJ binding energy
 # frac_opt (frac_aco) will grow in n_energies steps of dfrac_opt (dfrac_aco)
 
-n_energies   = 3
-dfrac_opt = 0.01
-dfrac_aco = 0.00
-ener_start_opt = 0.03 
-ener_start_aco = 0.0 
+n_energies   = 1
+dfrac_opt = 0.000000001
+dfrac_aco = 0.000000001
+ener_start_opt = 0.000000001
+ener_start_aco = 0.000000001
 
 print('phonon max energies. ',float(n_energies)*dfrac_opt,float(n_energies)*dfrac_aco)
 #
 
 # (3) number of configurations to average upon (for which velocity & energy combination) 
-nconfig = 1000
+nconfig = 5
 print('average will be taken on : ', nconfig,'  runs with different initial configurations ')
 
 #
@@ -63,7 +63,7 @@ print('fractional stiffnes factor applied to the backbond potential: ',frac_stif
 graphics = False
 works = zeros(nconfig)
 
-#-------------------
+
 def en_and_for(xdum,nat,sig,eps,i_potential):
 
     if(i_potential=="stiffer_lj"): 
@@ -74,14 +74,14 @@ def en_and_for(xdum,nat,sig,eps,i_potential):
 
     return(en,fc);
 
-#-------------------
+
 def velocity(time,tau,vel):
 # this builds up to a the velocity vell with gaussian speed, as time grows from zero and exceeds tau
      
     vell = vel*(1.- exp(-time**2.0/(2.0*tau**2.0)))
     return(vell)
 
-#-------------------
+
 def vdw_stiffer(xdum,nat,sig,eps):
 # returns the energy and forces for the single stiffer backbond case
 #
@@ -120,8 +120,8 @@ def vdw_stiffer(xdum,nat,sig,eps):
 
     return(en,fc);
 
-#--------------------------------------
-def   vdw_triple(xdum,nat,sig,eps):
+
+def vdw_triple(xdum,nat,sig,eps):
 
 # returns the energy and forces for the triple backbond case
 # d_eq is the LJ eq distance 
@@ -158,7 +158,7 @@ def   vdw_triple(xdum,nat,sig,eps):
 
       return(en,fc);
 
-#---------
+
 def verlet(x0,xm,dt,force,mass,nat,vell):
 
     dstep = vell*dt/2.0  # vel is the opening speed
@@ -172,8 +172,8 @@ def verlet(x0,xm,dt,force,mass,nat,vell):
     xnew[1:3] = x0[1:3] + (x0[1:3]-xm[1:3]) + force[1:3]*(dt**2)/mass
 
     return (xnew,dwork);
-#---------
-#
+
+
 def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,frac_tim,i_vel,i_ener,en_matrix,en_mask,i_potential):
 
     nat = 4  # number of atoms first and last mimic walls.
@@ -228,7 +228,7 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
     w_opt = 2*pi/per_opt
     w_aco = 2*pi/per_aco
 
-    #--------- opening velocity & time step
+    # --------- opening velocity & time step
 
     vel = frac_vel * speed_of_sound    # velocity  as fraction of the speed of sound of a LJ 1D lattice
     dt  = frac_tim * period            # time step as fraction of the period of a LJ dimer
@@ -238,8 +238,7 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
         print('iteration: ', i_sample) 
         t = 0.0
 
-
-        #---------initial equilibrium atoms positions
+        # ---------initial equilibrium atoms positions
 
         if(i_potential=="stiffer_lj"): 
             for i in range(0,nat):
@@ -250,12 +249,12 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
                 x0[0]=  x0[1]-d_eq/3.
                 x0[3]=  x0[2]+d_eq/3.
 
-# PHONON SETUPS
+        # PHONON SETUPS
 
-        en_opt = frac_opt*epsilon #---------target energy of the opt phonon in units of epsilon
-        en_aco = frac_aco*epsilon #---------target energy of the opt phonon in units of epsilon
+        en_opt = frac_opt*epsilon # ---------target energy of the opt phonon in units of epsilon
+        en_aco = frac_aco*epsilon # ---------target energy of the opt phonon in units of epsilon
 
-#-------------
+        # -------------
 
         dis_opt  = ( 2.0*en_opt/(red_mass * w_opt**2) )**0.5 # displacement for the opt phonon to have that energy
         dis_aco  = ( 2.0*en_aco/(aco_mass * w_aco**2) )**0.5 # displacement for the opt phonon to have that energy
@@ -280,7 +279,7 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
         xdmtot[0]=+xoptm/2.0 + xacom
         xdmtot[1]=-xoptm/2.0 + xacom
 
-# setting up initial atomic positions in absolute coords
+        # setting up initial atomic positions in absolute coords
 
         xm[:]=x0[:]
 
@@ -289,17 +288,17 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
         xm[1] = xm[1]+xdmtot[0]   # initial "past" time step
         xm[2] = xm[2]+xdmtot[1]
 
-# stores the opposite of the initial displacement in a vector for both atoms (delta x diplacement) 
+        # stores the opposite of the initial displacement in a vector for both atoms (delta x diplacement)
 
         delxd = zeros(2)
 
         delxd[0] = xm[1]-x0[1]
         delxd[1] = xm[2]-x0[2]
 
-# correction section for anharmonicity essentially this will be microcanonic dynamics with kin + pot fixed at the desired target
-# while epot and ekin won't necessarily be equal, so that half the target does not immediately give temperature (just a very good estimate)
-#
-# estimated potential: relaxed ground state energy  + phonon energy
+        # correction section for anharmonicity essentially this will be microcanonic dynamics with kin + pot fixed at the desired target
+        # while epot and ekin won't necessarily be equal, so that half the target does not immediately give temperature (just a very good estimate)
+        #
+        # estimated potential: relaxed ground state energy  + phonon energy
 
         e_bottom=0.0 
         if(i_potential=="stiffer_lj"): 
@@ -311,7 +310,6 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
         e_est = 0.5*red_mass*w_opt**2*xopt**2 +0.5*aco_mass*w_aco**2*xaco**2
         epot,fc = en_and_for(x0,nat,sig,eps,i_potential)
         print('estimated and real epots: ',e_est,epot -e_bottom) 
-
 
         # iterative trick: to converge to the displacement which will be associated 
         # with exactly the target elastic e_est in spite of the system being anharmonic. A few steps suffice. 
@@ -356,14 +354,13 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
 
         veldrift= zeros(4)
 
-# standard expected drift for the four atoms
+        # standard expected drift for the four atoms
 
         veldrift[0]=-vel/2.
         veldrift[1]=0.0
         veldrift[2]=0.0
         veldrift[3]= vel/2.
         clf()
-
 
         for i in range(1,nstep):
 
@@ -375,10 +372,10 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
 
             work = work + dwork
 
-#   worko[i]=work
+        #   worko[i]=work
 
-#   avg_worko[i] = avg_worko[i-1]*exp(-dt/tau) + (1.0 - exp(-dt/tau))*work
-            if graphics and i%100==10:
+        #   avg_worko[i] = avg_worko[i-1]*exp(-dt/tau) + (1.0 - exp(-dt/tau))*work
+            if graphics and i%1000==0:
                 plt.figure(1)
                 clf()
                 plot(x0,y0, marker='o', markersize=50)
@@ -386,32 +383,32 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
                 plt.show()
                 plt.draw()
                 
-#    plt.figure(2)
-#    plot(t,fc[0],'bo')
-#    draw()
+            #    plt.figure(2)
+            #    plot(t,fc[0],'bo')
+            #    draw()
 
             velo = zeros(nat)
             ekin=0.0
             velo = (xp -xm)/(2.0*dt)
             ekin = 0.5*mass*(velo[1]**2+velo[2]**2)
 
-#   ekkek[i]=ekin
-#   timev[i]=t/dt
-
-#            if i%1==0:
-#              plt.figure(3)
-#              plot(t,ekin,'+')
-#              draw()
-#  if i%10==1:
-#    plt.figure(4)
-#    plot(t,work,'go')
-#    draw()
+        #  ekkek[i]=ekin
+        #  timev[i]=t/dt
+        #
+        #           if i%1==0:
+        #             plt.figure(3)
+        #             plot(t,ekin,'+')
+        #             draw()
+        # if i%10==1:
+        #   plt.figure(4)
+        #   plot(t,work,'go')
+        #   draw()
 
             etot = epot + ekin
-#
-#  A DEFINITION OF WORK DONE BY THE TWO FORCES:
-#
-# for best convergence, we first define the drifting ref. frame
+        #
+        #  A DEFINITION OF WORK DONE BY THE TWO FORCES:
+        #
+        # for best convergence, we first define the drifting ref. frame
 
             ekdrift =0.0
             veldrift[1]=0.0
@@ -433,7 +430,6 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
 
             ekdrift = 0.5*mass*(veldrift[1]**2 + veldrift[2]**2)  # total drifting kinetic energy for the two atoms
 
-#
             ekinotto = 0.0
             ekinotto = 0.5*mass*((velo[1]-veldrift[1])**2 + (velo[2]-veldrift[2])**2) # kinetic energy of the oscillating fragments
                                                                                       # in their correct drifting ref. frames
@@ -480,46 +476,46 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
         en_matrix[i_vel,i_ener,i_sample]=ekinotto
 
 
-# averages ekin
-# nwhile = int(per_aco/dt) # averaged over the period of bouncing over once broken (same as acoustic mode)
-# print(nwhile) 
+    # averages ekin
+    # nwhile = int(per_aco/dt) # averaged over the period of bouncing over once broken (same as acoustic mode)
+    # print(nwhile)
 
-#for i in range(0,nstep-nwhile):
-# dummy = 0.0
-# for j in range(0,nwhile):
-#   dummy = dummy + ekkek[i+j]
-# dummy = dummy/float(nwhile)
-# ekavg[i+nwhile/2]=dummy
+    #for i in range(0,nstep-nwhile):
+    # dummy = 0.0
+    # for j in range(0,nwhile):
+    #   dummy = dummy + ekkek[i+j]
+    # dummy = dummy/float(nwhile)
+    # ekavg[i+nwhile/2]=dummy
 
-# for i in range(nstep-5*nwhile,nstep-nwhile):
-#   dummy = 0.0
-#   for j in range(0,nwhile):
-#     dummy = dummy + worko[i+j]
-#   dummy = dummy/float(nwhile)
-#   worvg[i+nwhile/2]=dummy
-# avg3_worko = (worvg + roll(worvg, nwhile/2))/2
+    # for i in range(nstep-5*nwhile,nstep-nwhile):
+    #   dummy = 0.0
+    #   for j in range(0,nwhile):
+    #     dummy = dummy + worko[i+j]
+    #   dummy = dummy/float(nwhile)
+    #   worvg[i+nwhile/2]=dummy
+    # avg3_worko = (worvg + roll(worvg, nwhile/2))/2
 
-# dummy = 0.0
-# for j in range(1,nwhile+1):
-#    dummy = dummy + worko[nstep-j]
-# dummy = dummy/float(nwhile)
-# print "config, work done: ", i_sample, dummy
-# print "heat: ", -(dummy+eps[1])
-# works[i_sample] = -(dummy+eps[1])
+    # dummy = 0.0
+    # for j in range(1,nwhile+1):
+    #    dummy = dummy + worko[nstep-j]
+    # dummy = dummy/float(nwhile)
+    # print "config, work done: ", i_sample, dummy
+    # print "heat: ", -(dummy+eps[1])
+    # works[i_sample] = -(dummy+eps[1])
 
-# avg2_worko = (avg_worko + roll(avg_worko, nwhile/2))/2
-# print "heat 2", avg_worko[nstep-1]
+    # avg2_worko = (avg_worko + roll(avg_worko, nwhile/2))/2
+    # print "heat 2", avg_worko[nstep-1]
 
     xav = average(works)
 
-#---------printing out
-#print "LJ period, optical and acoustic periods: ",period, per_opt, per_aco
-#print "atomic mass:",mass
+    #---------printing out
+    #print "LJ period, optical and acoustic periods: ",period, per_opt, per_aco
+    #print "atomic mass:",mass
 
     print('nsteps:      ',nstep)
     print('time step:   ',dt)
-#print('vdW sigma:   ',sig)
-#print('vdw eps:     ',epsilon)
+    #print('vdW sigma:   ',sig)
+    #print('vdw eps:     ',epsilon)
     print('    ')
     print('velocity:  ',frac_vel)
     print('phon. ens. ',frac_opt,frac_aco)
@@ -530,16 +526,16 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
     sigmamed = (var/float(nconfig))**0.5
     print('nconfig, average work, sigmamed: ',nconfig,xav,sigmamed)
 
-#plt.figure(5)
-#plot(timev,worvg,'+')
-#plot(timev,ekkek,'+')
-#plot(timev,ekavg,'+')
-#draw()
+    #plt.figure(5)
+    #plot(timev,worvg,'+')
+    #plot(timev,ekkek,'+')
+    #plot(timev,ekavg,'+')
+    #draw()
 
     return (xav,sigmamed)
 
 
-#-----------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
 # MAIN LOOP HERE, over equispaced velocities of pull, equispaced oscillator energies, each for a
 # number nconfig of initial random conditions (phases of the two oscillators) 
 #
@@ -569,17 +565,6 @@ for i_vel in range(0,n_velocities):
         energies[i_vel,i_ener] = x_average
         en_error[i_vel,i_ener] = sig_avera
 
-print("energies:")
-print(energies)
-print("  ") 
-print("en_error:")
-print(en_error)
-print("  ")
-print("energy matrix:")
-print(en_matrix)
-print("  ")
-print("en_mask:")
-print(en_mask)
 
 savetxt('energies.dat', energies)
 savetxt('en_error.dat', en_error)
@@ -607,6 +592,12 @@ for i_vel in range(0,n_velocities):
 
         energies_corr[i_vel,i_ener] = xav
         en_error_corr[i_vel,i_ener] = sigmamed
+
+
+plt.errorbar(velocities, energies_corr, yerr=en_error_corr, ls="none", marker="+")
+plt.xlabel("$\\frac{v}{v_s}$", size=24)
+plt.ylabel("$\\bar W$ / $\epsilon$", size=18)
+plt.show()
 
 print("energies, corrected:")
 print(energies_corr)
