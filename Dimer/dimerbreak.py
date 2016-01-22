@@ -36,7 +36,7 @@ class DimerBreak:
         self.results_temp = results_temp + "_" + str(round(self.frac_vel, 4)) + ".json"
         self.run_info = run_info
         self.total_runs = ((run_info[1] - run_info[0])/run_info[2])*nconfig
-        self.current_runs = (self.frac_vel/run_info[2])*nconfig
+        self.current_runs = ((self.frac_vel/run_info[2])*nconfig) - nconfig
 
     def vdw(self, xdum, nat, sig, eps):
 

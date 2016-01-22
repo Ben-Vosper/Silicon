@@ -39,7 +39,7 @@ class DimerBreak:
         #
         #i_potential = "triple_back"
         #frac_stif = 1.0
-        self.i_potential = "stiffer_lj"
+        self.i_potential = "triple_back"
 
         # If True, plot atom positions every 1000 steps
         self.graphics = False
@@ -47,7 +47,7 @@ class DimerBreak:
         self.results_temp = results_temp + "_" + str(round(self.frac_vel, 4)) + ".json"
         self.run_info = run_info
         self.total_runs = ((run_info[1] - run_info[0])/run_info[2])*nconfig
-        self.current_runs = (self.frac_vel/run_info[2])*nconfig
+        self.current_runs = ((self.frac_vel/run_info[2])*nconfig) - nconfig
 
     def en_and_for(self, xdum, nat, sig, eps, i_potential):
 
