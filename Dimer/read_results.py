@@ -35,6 +35,10 @@ def read_full_results(filename):
         results = json.load(q)
 
     nconfig = results["params"][7]
+    f_stiffness = results["params"][6]
+    f_aco = results["params"][5]
+    f_opt = results["params"][4]
+    T_approx = round(((f_opt + f_aco)/2) * 11600)
     v_vals = list(results.keys())
     v_vals.remove("params")
 
@@ -46,6 +50,9 @@ def read_full_results(filename):
     plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")
     plt.xlabel("$\\frac{v}{v_s}$", size=24)
     plt.ylabel("$\\bar W$ / $\epsilon$", size=18)
+    param_string = "Approximate Temperature = " + str(T_approx) + "K" + "\nopt = " + str(format(f_opt, ".3g")) +\
+                   "\naco = " + str(format(f_aco, ".3g")) + "\nStiffness = " + str(f_stiffness)
+    plt.title(param_string, loc="left", fontsize=12)
     plt.show()
 
-read_full_results("Results\\opt0_aco0.1.json")
+read_full_results("300_f0.4_new.json")

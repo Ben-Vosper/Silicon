@@ -114,12 +114,11 @@ class DimerBreak:
 
           d_eq=sig*2.**(1./6.)
           d_lat = d_eq*2.*(2**.5)/3.0    # tetrahedron base radius, if d_eq is the tetrahedron radius
-    #
+
           r =  xdum[2] - xdum[1]
           en = en + 4.0*eps[1]*( (sig/r)**12 - (sig/r)**6)
           fc[1] = 4.0*eps[1]*(-12.0*(sig/r)**13 +6.0*(sig/r)**7)/sig
           fc[2] = -fc[1]
-
 
           r = xdum[1] - xdum[0]
 
@@ -128,7 +127,6 @@ class DimerBreak:
 
           fc[0] = 72.0*eps[0]*r*(1.-2.0*sig**6/den**3)/den**4
           fc[1] = fc[1] - fc[0]
-
 
           r = xdum[3] - xdum[2]
 

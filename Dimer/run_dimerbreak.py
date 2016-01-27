@@ -2,20 +2,27 @@ from Dimer.dimerbreak import DimerBreak
 import matplotlib.pyplot as plt
 import json
 
-results_temp = "t.json"
+results_temp = "300_f0.4_new.json"
 
-v = 0.05
+v = 0.01
 v_max = 1
 v_inc = 0.005
 
+# Setting temperature. Using 1eV = 11600kB
+
+T = 300
+sum_of_modes = T/11600 * 2
+mode_fraction = 0.4                # f_opt/sum_of_modes
+
+f_opt = sum_of_modes*mode_fraction
+f_aco = sum_of_modes - f_opt
+
 f_timestep = 0.002
-f_opt = 0.0000005
-f_aco = 0.1
 f_stiffness = 1.1
 
 run_info = (v, v_max, v_inc)
 
-nconfig = 5
+nconfig = 100
 
 v_list = []
 w_means = []
