@@ -2,34 +2,40 @@ from Dimer_3.dimerbreak_3 import DimerBreak
 import matplotlib.pyplot as plt
 import json
 
-results_temp = "test.json"
+results_temp = "300_0.1_test.json"
 
 v = 0.05
 v_max = 1
-v_inc = 0.01
+v_inc = 0.005
+
+# Setting temperature. Using 1eV = 11600kB
+
+T = 300
+sum_of_modes = T/11600 * 2
+mode_fraction = 0.1                # f_opt/sum_of_modes
+
+f_opt = sum_of_modes*mode_fraction
+f_aco = sum_of_modes - f_opt
 
 f_timestep = 0.002
-f_opt = 0.00000000002
-f_aco = 0.00000000002
-f_stiffness = 1.2
+f_stiffness = 1.1
 
 run_info = (v, v_max, v_inc)
 
-nconfig = 5
+nconfig = 100
 
 v_list = []
 w_means = []
 w_errbar_size = []
 
-results = {}
-results["params"] = (v, v_max, v_inc, f_timestep, f_opt, f_aco, f_stiffness, nconfig)
+results = {"params": (v, v_max, v_inc, f_timestep, f_opt, f_aco, f_stiffness, nconfig)}
 
 total_breaks = ((v_max - v)/v_inc)*nconfig
 breaks = 0
 
 while v < v_max:
 
-    t = DimerBreak(v, f_timestep, nconfig, f_opt, f_aco, f_stiffness, "test",  run_info)
+    t = DimerBreak(v, f_timestep, nconfig, f_opt, f_aco, f_stiffness, results_temp.replace(".json", ""),  run_info)
     w_mean, w_dev = t.run()
 
     results[v] = (w_mean, w_dev)

@@ -37,9 +37,8 @@ class DimerBreak:
         #---BACKBOND FORCE FIELD CHOICES, and stiffnes ratios [energy of the back_bond(s) relative to the central bond]
         #   the backbond force field can be either a stiffer Lennard-Jones or a triple (each not stiffer) LJ backbond proxected along z
         #
-        #i_potential = "triple_back"
-        #frac_stif = 1.0
-        self.i_potential = "triple_back"
+        #self.i_potential = "triple_back"
+        self.i_potential = "stiffer_lj"
 
         # If True, plot atom positions every 1000 steps
         self.graphics = False
@@ -393,23 +392,10 @@ class DimerBreak:
             #
             # for best convergence, we first define the drifting ref. frame
 
-                ekdrift =0.0
-                veldrift[1]=0.0
-                veldrift[2]=0.0
-
-                if (abs(x0[1]-x0[0]) < 3.0*sig):    # left atom drifting left with left wall
-                    veldrift[1]=-vel/2.
-                    if(abs(x0[2]-x0[1]) < 3.0*sig): # right atom drifting left with left atom
-                        veldrift[2]= -vel/2.
-
-                if (abs(x0[3]-x0[2]) < 3.0*sig):    # right atom drifting right with right wall
-                    veldrift[2]= vel/2.
-                    if(abs(x0[2]-x0[1]) < 3.0*sig):   # left atom drifting right with right atom
-                        veldrift[1]= vel/2.
-
-                if( (abs(x0[1]-x0[0]) > 3.0*sig) or (abs(x0[3]-x0[2]) > 3.0*sig)): # non standard event
-                    en_mask = 0    # flagged for later use
-
+                veldrift[0] = -vel/2.
+                veldrift[1] = -vel/2.
+                veldrift[2] = vel/2.
+                veldrift[3] = vel/2.
 
                 ekdrift = 0.5*mass*(veldrift[1]**2 + veldrift[2]**2)  # total drifting kinetic energy for the two atoms
 
@@ -418,10 +404,10 @@ class DimerBreak:
                                                                                           # in their correct drifting ref. frames
                 ekinotto =  ekinotto + (epot - e_bottom)               # total oscillators energy in the drifting ref. frames
 
-                ekinotto =  ekinotto + ekdrift                         # ..plus drifting kin. energy of the two atoms
+                #ekinotto =  ekinotto + ekdrift                         # ..plus drifting kin. energy of the two atoms
 
                 ekinotto =  ekinotto -en_opt -en_aco                   # ..minus the initial oscillator energy before the pull
-                # ekinotto =  ekinotto - eps[1]                          # and we choose as zero the energy it took to break the central bond
+                ekinotto =  ekinotto - eps[1]                          # and we choose as zero the energy it took to break the central bond
 
     # so this is the energy to break the bond at the net of the static bond energy and the translational kinetic energy
     # it can be negative (in which case, initial oscillations helped the bond breaking)
@@ -477,7 +463,7 @@ class DimerBreak:
             progress = (self.current_runs/self.total_runs)*100
             est_time_remaining = round(((self.total_runs - self.current_runs)*run_time)/60, 2)
 
-            print(str(round(progress, 2)), ("%   Complete. Max time remaining = "), str(est_time_remaining), " Minutes.")
+            print(str(round(progress, 2)), "% Complete.      Max time remaining = ", str(est_time_remaining), " Minutes.")
 
         os.remove(self.results_temp)
         return mean(works), statistics.pstdev(works)

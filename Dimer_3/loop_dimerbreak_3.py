@@ -24,14 +24,14 @@ print('max velocity:', dfrac_vel*float(n_velocities) )
 n_energies   = 1
 dfrac_opt = 0.000000001
 dfrac_aco = 0.000000001
-ener_start_opt = 0.000000001
-ener_start_aco = 0.000000001
+ener_start_opt = 0.0052
+ener_start_aco = 0.047
 
 print('phonon max energies. ',float(n_energies)*dfrac_opt,float(n_energies)*dfrac_aco)
 #
 
 # (3) number of configurations to average upon (for which velocity & energy combination) 
-nconfig = 5
+nconfig = 10
 print('average will be taken on : ', nconfig,'  runs with different initial configurations ')
 
 #
@@ -41,18 +41,16 @@ print('time step (as a fraction of the period of a LJ dimer): ',frac_tim)
 #
 # (5) number of LJ sigmas the pulling will be taken to (must be enough to fully break the bond)
 #     the number of MD steps will be:   nstep = int(n_sigmas*sig/(vel*dt))
-n_sigmas = 8.0
+n_sigmas = 7.0
 print('brk distance (in units of LJ sigmas): ',n_sigmas) 
 #
-
-
 #---BACKBOND FORCE FIELD CHOICES, and stiffnes ratios [energy of the back_bond(s) relative to the central bond]
 #   the backbond force field can be either a stiffer Lennard-Jones or a triple (each not stiffer) LJ backbond proxected along z
 #
 #i_potential = "triple_back"
 #frac_stif = 1.0   
 i_potential = "stiffer_lj"
-frac_stif = 1.1
+frac_stif = 1.2
 #
 print('backbond potential linking the two atoms to the opening walls: ', i_potential)     
 print('fractional stiffnes factor applied to the backbond potential: ',frac_stif)
@@ -411,22 +409,10 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
         # for best convergence, we first define the drifting ref. frame
 
             ekdrift =0.0
-            veldrift[1]=0.0
-            veldrift[2]=0.0
-
-            if (abs(x0[1]-x0[0]) < 3.0*sig):    # left atom drifting left with left wall
-                veldrift[1]=-vel/2.
-                if(abs(x0[2]-x0[1]) < 3.0*sig): # right atom drifting left with left atom
-                    veldrift[2]= -vel/2.
-
-            if (abs(x0[3]-x0[2]) < 3.0*sig):    # right atom drifting right with right wall
-                veldrift[2]= vel/2.
-                if(abs(x0[2]-x0[1]) < 3.0*sig):   # left atom drifting right with right atom
-                    veldrift[1]= vel/2.
-
-            if( (abs(x0[1]-x0[0]) > 3.0*sig) or (abs(x0[3]-x0[2]) > 3.0*sig)): # non standard event
-                en_mask[i_vel,i_ener,i_sample] = 1    # flagged for later use
-
+            veldrift[0] = -vel/2.
+            veldrift[1] = -vel/2.
+            veldrift[2] = vel/2.
+            veldrift[3] = vel/2.
 
             ekdrift = 0.5*mass*(veldrift[1]**2 + veldrift[2]**2)  # total drifting kinetic energy for the two atoms
 
@@ -435,7 +421,7 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
                                                                                       # in their correct drifting ref. frames
             ekinotto =  ekinotto + (epot - e_bottom)               # total oscillators energy in the drifting ref. frames 
 
-            ekinotto =  ekinotto + ekdrift                         # ..plus drifting kin. energy of the two atoms
+            #ekinotto =  ekinotto + ekdrift                         # ..plus drifting kin. energy of the two atoms
 
             ekinotto =  ekinotto -en_opt -en_aco                   # ..minus the initial oscillator energy before the pull
             ekinotto =  ekinotto - eps[1]                          # and we choose as zero the energy it took to break the central bond
@@ -457,7 +443,7 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
             t = t + dt
 
 
-        if ((x0[2]-x0[1]) < sig*(float(n_sigmas)-3.0)) :
+        if ((x0[2]-x0[1]) > sig*(float(n_sigmas)-3.0)) :
             print('LOST COHERENCE at frac_vel,frac_opt,frac_aco', frac_vel,frac_opt,frac_aco) 
 
             if(  ((x0[1] < 0) and (x0[2] < 0)) or ((x0[1] > 0) and (x0[2] > 0)) ):    # a stiff, not a weak bond was broken

@@ -2,7 +2,7 @@ from Dimer.dimerbreak import DimerBreak
 import matplotlib.pyplot as plt
 import json
 
-results_temp = "300_f0.4_new.json"
+results_temp = "300_f0_new.json"
 
 v = 0.01
 v_max = 1
@@ -12,7 +12,7 @@ v_inc = 0.005
 
 T = 300
 sum_of_modes = T/11600 * 2
-mode_fraction = 0.4                # f_opt/sum_of_modes
+mode_fraction = 0                # f_opt/sum_of_modes
 
 f_opt = sum_of_modes*mode_fraction
 f_aco = sum_of_modes - f_opt
@@ -28,8 +28,7 @@ v_list = []
 w_means = []
 w_errbar_size = []
 
-results = {}
-results["params"] = (v, v_max, v_inc, f_timestep, f_opt, f_aco, f_stiffness, nconfig)
+results = {"params": (v, v_max, v_inc, f_timestep, f_opt, f_aco, f_stiffness, nconfig)}
 
 total_breaks = ((v_max - v)/v_inc)*nconfig
 breaks = 0
@@ -48,12 +47,16 @@ while v < v_max:
     v += v_inc
 
     breaks += 1
-    #print(str(round((breaks/total_breaks)*100, 2)) + "%   Complete.")
 
     with open(results_temp, 'w') as q:
         json.dump(results, q, indent=2)
 
+T_approx = round(((f_opt + f_aco)/2) * 11600)
+
 plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")
 plt.xlabel("$\\frac{v}{v_s}$", size=24)
 plt.ylabel("$\\bar W$ / $\epsilon$", size=18)
+param_string = "Approximate Temperature = " + str(T_approx) + "K" + "\nopt = " + str(format(f_opt, ".3g")) +\
+                   "\naco = " + str(format(f_aco, ".3g")) + "\nStiffness = " + str(f_stiffness)
+plt.title(param_string, loc="left", fontsize=12)
 plt.show()

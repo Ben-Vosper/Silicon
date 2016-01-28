@@ -55,4 +55,5 @@ def read_full_results(filename):
     plt.title(param_string, loc="left", fontsize=12)
     plt.show()
 
-read_full_results("300_f0.4_new.json")
+#read_full_results("E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\300_0.1_test.json")
+read_full_results("Results\\300_f0_new.json")
