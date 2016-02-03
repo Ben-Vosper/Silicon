@@ -2,27 +2,27 @@ from Dimer.dimerbreak import DimerBreak
 import matplotlib.pyplot as plt
 import json
 
-results_temp = "300_f0_new.json"
+results_temp = "cold_wierddrift.json"
 
-v = 0.01
+v = 0.05
 v_max = 1
 v_inc = 0.005
 
-# Setting temperature. Using 1eV = 11600kB
+# Setting temperature. Using 1eV/K = 11600kB
 
-T = 300
+T = 0.0000001
 sum_of_modes = T/11600 * 2
-mode_fraction = 0                # f_opt/sum_of_modes
+mode_fraction = 0.5                # f_opt/sum_of_modes
 
 f_opt = sum_of_modes*mode_fraction
 f_aco = sum_of_modes - f_opt
 
 f_timestep = 0.002
-f_stiffness = 1.1
+f_stiffness = 1.2
 
 run_info = (v, v_max, v_inc)
 
-nconfig = 100
+nconfig = 1
 
 v_list = []
 w_means = []

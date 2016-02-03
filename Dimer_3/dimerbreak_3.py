@@ -37,8 +37,8 @@ class DimerBreak:
         #---BACKBOND FORCE FIELD CHOICES, and stiffnes ratios [energy of the back_bond(s) relative to the central bond]
         #   the backbond force field can be either a stiffer Lennard-Jones or a triple (each not stiffer) LJ backbond proxected along z
         #
-        #self.i_potential = "triple_back"
-        self.i_potential = "stiffer_lj"
+        self.i_potential = "triple_back"
+        #self.i_potential = "stiffer_lj"
 
         # If True, plot atom positions every 1000 steps
         self.graphics = False

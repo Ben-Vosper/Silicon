@@ -24,8 +24,8 @@ print('max velocity:', dfrac_vel*float(n_velocities) )
 n_energies   = 1
 dfrac_opt = 0.000000001
 dfrac_aco = 0.000000001
-ener_start_opt = 0.0052
-ener_start_aco = 0.047
+ener_start_opt = 0.00002
+ener_start_aco = 0.00002
 
 print('phonon max energies. ',float(n_energies)*dfrac_opt,float(n_energies)*dfrac_aco)
 #

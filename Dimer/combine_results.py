@@ -46,9 +46,9 @@ def combine_results(filename_list):
     plt.title(param_string, loc="left", fontsize=12)
     plt.show()
 
-combine_results(["Results\\300_f0.1.json", "Results\\300_f0.2_new.json", "Results\\300_f0.3_new.json",
-                 "Results\\300_f0.4_new.json", "Results\\300_f0.5_new.json", "Results\\300_f0.6_new.json",
-                 "Results\\300_f0.7_new.json", "Results\\300_f0.8_new.json", "Results\\300_f0.9_new.json",
-                 "Results\\300_f1_new.json"])
+combine_results(["Results\\300_triple_f0.json", "Results\\300_triple_f0.1.json", "Results\\300_triple_f0.2.json", "Results\\300_triple_f0.3.json",
+                 "Results\\300_triple_f0.4.json", "Results\\300_triple_f0.5.json", "Results\\300_triple_f0.6.json",
+                 "Results\\300_triple_f0.7.json", "Results\\300_triple_f0.8.json", "Results\\300_triple_f0.9.json",
+                 "Results\\300_triple_f1.json"])
 
 #"E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\300_0.1_test.json"

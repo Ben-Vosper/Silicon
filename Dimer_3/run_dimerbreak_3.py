@@ -2,27 +2,27 @@ from Dimer_3.dimerbreak_3 import DimerBreak
 import matplotlib.pyplot as plt
 import json
 
-results_temp = "300_0.1_test.json"
+results_temp = "cold_triple_vell.json"
 
 v = 0.05
 v_max = 1
-v_inc = 0.005
+v_inc = 0.01
 
 # Setting temperature. Using 1eV = 11600kB
 
-T = 300
+T = 1
 sum_of_modes = T/11600 * 2
-mode_fraction = 0.1                # f_opt/sum_of_modes
+mode_fraction = 0.5                # f_opt/sum_of_modes
 
 f_opt = sum_of_modes*mode_fraction
 f_aco = sum_of_modes - f_opt
 
 f_timestep = 0.002
-f_stiffness = 1.1
+f_stiffness = 1.0
 
 run_info = (v, v_max, v_inc)
 
-nconfig = 100
+nconfig = 10
 
 v_list = []
 w_means = []
