@@ -192,10 +192,10 @@ def combine_results(filename_list):
     plt.suptitle("Depth of resonance at $\\frac{v}{v_s}\\approx$0.05", fontsize=12)
     plt.show()
 
-combine_results(["Results\\300_f0.1.json", "Results\\300_f0.2_new.json", "Results\\300_f0.3_new.json",
-                 "Results\\300_f0.4_new.json", "Results\\300_f0.5_new.json", "Results\\300_f0.6_new.json",
-                 "Results\\300_f0.7_new.json", "Results\\300_f0.8_new.json", "Results\\300_f0.9_new.json",
-                 "Results\\300_f1_new.json", "Results\\300_f0_new.json"])
+combine_results(["Old\\300_f0.1.json", "Old\\300_f0.2_new.json", "Old\\300_f0.3_new.json",
+                 "Old\\300_f0.4_new.json", "Old\\300_f0.5_new.json", "Old\\300_f0.6_new.json",
+                 "Old\\300_f0.7_new.json", "Old\\300_f0.8_new.json", "Old\\300_f0.9_new.json",
+                 "Old\\300_f1_new.json", "Old\\300_f0_new.json"])
 
 #read_full_results("E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\300_0.1_test.json")
-#read_full_results("Results\\300_f1_new.json")
+#read_full_results("Old\\300_f1_new.json")

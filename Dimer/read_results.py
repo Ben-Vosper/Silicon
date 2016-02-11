@@ -38,14 +38,14 @@ def read_full_results(filename):
     f_stiffness = results["params"][6]
     f_aco = results["params"][5]
     f_opt = results["params"][4]
-    T_approx = round(((f_opt + f_aco)/2) * 11600)
+    T_approx = round(((f_opt + f_aco)/2) * 26682.1)
     v_vals = list(results.keys())
     v_vals.remove("params")
 
     for v in v_vals:
         v_list.append(v)
         w_means.append(results[v][0])
-        w_errbar_size.append(results[v][1]/(nconfig**0.5))
+        w_errbar_size.append(results[v][1]/(results[v][2]**0.5))
 
     plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")
     plt.xlabel("$\\frac{v}{v_s}$", size=24)
@@ -56,4 +56,4 @@ def read_full_results(filename):
     plt.show()
 
 #read_full_results("E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\cold_v3_vel_drift.json")
-read_full_results("t.json")
+read_full_results("300_f0.5.json")

@@ -408,11 +408,22 @@ def energy_of_breaking(frac_vel,frac_opt,frac_aco,frac_stif,nconfig,n_sigmas,fra
         #
         # for best convergence, we first define the drifting ref. frame
 
-            ekdrift =0.0
-            veldrift[0] = -vel/2.
-            veldrift[1] = -vel/2.
-            veldrift[2] = vel/2.
-            veldrift[3] = vel/2.
+            veldrift[1]=0.0
+            veldrift[2]=0.0
+
+            if (abs(x0[1]-x0[0]) < 3.0*sig):    # left atom drifting left with left wall
+                veldrift[1]=-vel/2.
+                if(abs(x0[2]-x0[1]) < 3.0*sig): # right atom drifting left with left atom
+                    veldrift[2]= -vel/2.
+
+            if (abs(x0[3]-x0[2]) < 3.0*sig):    # right atom drifting right with right wall
+                veldrift[2]= vel/2.
+                if(abs(x0[2]-x0[1]) < 3.0*sig):   # left atom drifting right with right atom
+                    veldrift[1]= vel/2.
+
+            if( (abs(x0[1]-x0[0]) > 3.0*sig) or (abs(x0[3]-x0[2]) > 3.0*sig)): # non standard event
+                en_mask[i_vel,i_ener,i_sample] = 1    # flagged for later use
+
 
             ekdrift = 0.5*mass*(veldrift[1]**2 + veldrift[2]**2)  # total drifting kinetic energy for the two atoms
 

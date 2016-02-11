@@ -45,10 +45,12 @@ def combine_results(filename_list):
                    "\naco = " + str(format(f_aco, ".3g")) + "\nStiffness = " + str(f_stiffness)
     plt.title(param_string, loc="left", fontsize=12)
     plt.show()
+#
+# combine_results(["Old\\300_triple_f0.json", "Old\\300_triple_f0.1.json", "Old\\300_triple_f0.2.json", "Old\\300_triple_f0.3.json",
+#                  "Old\\300_triple_f0.4.json", "Old\\300_triple_f0.5.json", "Old\\300_triple_f0.6.json",
+#                  "Old\\300_triple_f0.7.json", "Old\\300_triple_f0.8.json", "Old\\300_triple_f0.9.json",
+#                  "Old\\300_triple_f1.json"])
 
-combine_results(["Results\\300_triple_f0.json", "Results\\300_triple_f0.1.json", "Results\\300_triple_f0.2.json", "Results\\300_triple_f0.3.json",
-                 "Results\\300_triple_f0.4.json", "Results\\300_triple_f0.5.json", "Results\\300_triple_f0.6.json",
-                 "Results\\300_triple_f0.7.json", "Results\\300_triple_f0.8.json", "Results\\300_triple_f0.9.json",
-                 "Results\\300_triple_f1.json"])
+combine_results(["Results\\cold_s1.1.json", "cold_s1.1_vel.json"])
 
 #"E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\300_0.1_test.json"

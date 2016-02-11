@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.image as mpimg
 import os, json, statistics, time
 from pylab import *
+from matplotlib import animation
 
 class DimerBreak:
 
@@ -30,7 +31,7 @@ class DimerBreak:
         #
         # (6) number of LJ sigmas the pulling will be taken to (must be enough to fully break the bond)
         #     the number of MD steps will be:   nstep = int(n_sigmas*sig/(vel*dt))
-        self.n_sigmas = 7.0
+        self.n_sigmas = 7
         print("brk dist: ", self.n_sigmas)
 
         self.i_potential = "stiffer_lj"
@@ -152,12 +153,12 @@ class DimerBreak:
         t = 0.0
 
         #--------- potential setting
-        epsilon = 1.0
+        epsilon = 1
         eps = zeros(nat-1)
         eps[0] = epsilon*self.frac_stif
         eps[1] = epsilon
         eps[2] = epsilon*self.frac_stif
-        sig = 1.0
+        sig = 1
         d_eq = sig*2.0**(1./6.0)     # vdW eq. distance
         mass = 2.0  # mass of each atom
         red_mass = mass/2.0  # reduced mass (mass of the optical oscillator)
@@ -166,7 +167,7 @@ class DimerBreak:
         period = (2.0*pi*sig/(6.0*2.**(1./3)))*(red_mass/epsilon)**0.5                 #--------- period of a free LJ dimer
 
         if self.i_potential == "stiffer_lj":
-            per_opt = (2.0*pi*sig/(6.0*2.**(1./3)))*(red_mass/(0.5*eps[0]+eps[1]))**0.5    #--------- period of the optical mode (stiffer single backbond)
+            per_opt = (2.0*pi*sig/(6.0*2.**(1./3)))*(red_mass/((0.5*eps[0])+eps[1]))**0.5    #--------- period of the optical mode (stiffer single backbond)
             per_aco = (2.0*pi*sig/(6.0*2.**(1./3)))*(aco_mass/(2.0*eps[0]))**0.5           #--------- period of the acoustic mode
 
         elif self.i_potential == "triple_back":
@@ -186,8 +187,15 @@ class DimerBreak:
 
         works = []
         en_mask = 0
-        ekin_total_list = []
-        epot_total_list = []
+        pos1 = []
+        pos2 = []
+        pos0 = []
+        pos3 = []
+        times = []
+        eq = []
+        disp = []
+        maxes = []
+
         for i_sample in range(0, self.nconfig):
 
             if i_sample == 0:
@@ -276,6 +284,7 @@ class DimerBreak:
             xm[1] = x0[1] + delxd[0]
             xm[2] = x0[2] + delxd[1]
 
+            #nstep = 10000
             nstep = int(self.n_sigmas*sig/(vel*dt))
             work = 0.0
 
@@ -337,6 +346,26 @@ class DimerBreak:
 
                 #if i%1000==1: print(("%6d"+"%12.8f"*6) % (i,ekin,epot,etot, work, etot + work, ekinotto))
 
+                if i % 10 == 0:
+                    pos1.append(x0[1])
+                    pos2.append(x0[2])
+
+                    pos0.append(x0[0])
+                    pos3.append(x0[3])
+                    times.append(t)
+                #
+                # if (i - 1) == 0:
+                #     eq.append(0)
+                # else:
+                #     eq.append(eq[i - 2] + veldrift[1]*dt)
+                #
+                # disp.append((pos1[i - 1]) - (pos2[i - 1]))
+                # #print(pos1[i - 1], eq[i - 1], disp[i - 1])
+                #
+                # if i > 3:
+                #     if pos1[i - 3] < pos1[i - 2] > pos1[i - 1]:
+                #         maxes.append(t)
+
                 xm[:] = x0[:]
                 x0[:] = xp[:]
                 t += dt
@@ -356,39 +385,77 @@ class DimerBreak:
                 print('DISASTER, POSITIONS: ',x0)
                 sys.exit(0)
 
-            print(en_mask)
+            # periods = []
+            # prev = 0
+            # for t in maxes:
+            #     periods.append(t - prev)
+            #     prev = t
+            # print(statistics.mean(periods), statistics.pstdev(periods))
+            #
+            # plt.plot(times, pos1, ls="none", marker="+", color=(0, 0.5, 0.5))
+            # plt.plot(times, pos2, ls="none", marker="+", color=(0.5, 0, 0.5))
+            # plt.show()
 
-            if i_sample == 0:
-                end_time = time.time()
-                run_time = end_time - start_time
-                # if (vel/speed_of_sound) > 0.2:
-                #     plot(x0, y0, marker='o', markersize=50)
-                #     axis([-3.0*float(nat)/2.0, 3.0*float(nat)/2.0, -1, 1])
-                #     plt.show()
-                #     clf()
+            fig = plt.figure()
+            ax = plt.axes(xlim=(-5, 5), ylim=(-2, 2))
+            atom1, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5))
+            atom2, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5))
 
-            self.current_runs += 1
+            bond1, = ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5))
+            bond2, = ax.plot([], [], ls="--", lw=2, color=(0, 1, 0.5))
+            bond3, = ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5))
+            wall1, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5, 0.5, 0))
+            wall2, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5, 0.5, 0))
+            time_text = ax.text(-4.9, -1.9, "")
 
-            progress = (self.current_runs/self.total_runs)*100
-            est_time_remaining = round(((self.total_runs - self.current_runs)*run_time)/60, 2)
+            def init():
+                bond1.set_data([], [])
+                bond2.set_data([], [])
+                bond3.set_data([], [])
+                atom1.set_data([], [])
+                atom2.set_data([], [])
+                wall1.set_data([], [])
+                wall2.set_data([], [])
+                time_text.set_text('')
+                return bond1, bond2, bond3, atom1, atom1, wall1, wall2, time_text
 
-            print(str(round(progress, 2)), "% Complete.      Max time remaining = ", str(est_time_remaining), " Minutes.")
+            # animation function.  This is called sequentially
+            def animate(i):
+                x1 = pos1[i]
+                x2 = pos2[i]
+                y = 0
+                bond1x = [pos0[i], x1]
+                bond2x = [x1, x2]
+                bond3x = [x2, pos3[i]]
+                bondy = [0, 0]
+                if abs(bond2x[0] - bond2x[1]) < 3:
+                    bond2.set_data(bond2x, bondy)
+                else:
+                    bond2.set_data(0, 0)
+                if abs(bond1x[0] - bond1x[1]) < 3:
+                    bond1.set_data(bond1x, bondy)
+                else:
+                    bond1.set_data(0, 0)
+                if abs(bond3x[0] - bond3x[1]) < 3:
+                    bond3.set_data(bond3x, bondy)
+                else:
+                    bond3.set_data(0, 0)
+                atom1.set_data(x1, y)
+                atom2.set_data(x2, y)
+                wall1.set_data(pos0[i], y)
+                wall2.set_data(pos3[i], y)
 
-            if en_mask == 0:
-                try:
-                    with open(self.results_temp, 'rw') as q:
-                        works = json.load(q)
+                time_text.set_text("time = " + format(times[i], ".3f"))
 
-                        works.append(ekinotto)
+                return bond1, bond2, bond3, atom1, atom2, wall1, wall2, time_text
 
-                        json.dump(works, q)
-                except:
-                    works.append(ekinotto)
-                    with open(self.results_temp, 'w') as q:
-                        json.dump(works, q)
+            # call the animator.  blit=True means only re-draw the parts that have changed.
+            anim = animation.FuncAnimation(fig, animate, init_func=init,
+                                           frames=len(pos1), interval=1, blit=True)
+            # print(len(pos1), len(pos1)/60)
+            # anim.save('dimer.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+            plt.show()
 
-        try:
-            os.remove(self.results_temp)
-        except:
-            pass
-        return works
+
+z = DimerBreak(0.08, 0.002, 1, 0.0225, 0.0, 1.1, "q.json", (1, 1, 1))
+z.run()
