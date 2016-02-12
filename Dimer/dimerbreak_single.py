@@ -3,6 +3,7 @@ import matplotlib.image as mpimg
 import os, json, statistics, time
 from pylab import *
 from matplotlib import animation
+from scipy.optimize import curve_fit
 
 class DimerBreak:
 
@@ -284,8 +285,8 @@ class DimerBreak:
             xm[1] = x0[1] + delxd[0]
             xm[2] = x0[2] + delxd[1]
 
-            #nstep = 10000
-            nstep = int(self.n_sigmas*sig/(vel*dt))
+            nstep = 5000
+            #nstep = int(self.n_sigmas*sig/(vel*dt))
             work = 0.0
 
             veldrift = zeros(4)
@@ -346,25 +347,27 @@ class DimerBreak:
 
                 #if i%1000==1: print(("%6d"+"%12.8f"*6) % (i,ekin,epot,etot, work, etot + work, ekinotto))
 
-                if i % 10 == 0:
+                if i % 1 == 0:
                     pos1.append(x0[1])
                     pos2.append(x0[2])
 
                     pos0.append(x0[0])
                     pos3.append(x0[3])
                     times.append(t)
+
+                    disp.append((pos1[i - 1]) - (pos2[i - 1]))
                 #
                 # if (i - 1) == 0:
                 #     eq.append(0)
                 # else:
                 #     eq.append(eq[i - 2] + veldrift[1]*dt)
                 #
-                # disp.append((pos1[i - 1]) - (pos2[i - 1]))
+
                 # #print(pos1[i - 1], eq[i - 1], disp[i - 1])
                 #
-                # if i > 3:
-                #     if pos1[i - 3] < pos1[i - 2] > pos1[i - 1]:
-                #         maxes.append(t)
+                if i > 3:
+                    if pos1[i - 3] < pos1[i - 2] > pos1[i - 1]:
+                        maxes.append(t)
 
                 xm[:] = x0[:]
                 x0[:] = xp[:]
@@ -390,10 +393,30 @@ class DimerBreak:
             # for t in maxes:
             #     periods.append(t - prev)
             #     prev = t
-            # print(statistics.mean(periods), statistics.pstdev(periods))
+            # # print(statistics.mean(periods), statistics.pstdev(periods))
+            # #
+            # plt.plot(times, disp, ls="none", marker="+", color=(0, 0.5, 0.5))
             #
-            # plt.plot(times, pos1, ls="none", marker="+", color=(0, 0.5, 0.5))
-            # plt.plot(times, pos2, ls="none", marker="+", color=(0.5, 0, 0.5))
+            # fit = []
+            #
+            # def sin_fit(tl, amp, freq, phase, offset):
+            #     q = []
+            #     for t in tl:
+            #         q.append(amp*math.sin((freq*t) + phase) - offset)
+            #     return q
+            #
+            # #p0 = [0.05, 10, -0.5, 1.125]
+            # p0 = [1, (2*pi/statistics.mean(periods)), 1, 1]
+            #
+            #
+            # parms, cov = curve_fit(sin_fit, times, disp, p0)
+            #
+            # print(parms)
+            # for t in times:
+            #     fit.append(parms[0]*math.sin((parms[1]*t) + parms[2]) - parms[3])
+            #
+            #
+            # plt.plot(times, fit, ls="none", marker="+", color=(0.5, 0, 0.5))
             # plt.show()
 
             fig = plt.figure()
@@ -454,8 +477,8 @@ class DimerBreak:
                                            frames=len(pos1), interval=1, blit=True)
             # print(len(pos1), len(pos1)/60)
             # anim.save('dimer.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
-            plt.show()
+            #plt.show()
 
 
-z = DimerBreak(0.08, 0.002, 1, 0.0225, 0.0, 1.1, "q.json", (1, 1, 1))
+z = DimerBreak(0, 0.002, 1, 0.002, 0.0, 1.2, "q.json", (1, 1, 1))
 z.run()
