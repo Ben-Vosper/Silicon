@@ -3,6 +3,7 @@ import matplotlib.image as mpimg
 import os, json, statistics, time
 from pylab import *
 from matplotlib import animation
+from scipy.optimize import curve_fit
 
 class DimerBreak:
 
@@ -284,7 +285,7 @@ class DimerBreak:
             xm[1] = x0[1] + delxd[0]
             xm[2] = x0[2] + delxd[1]
 
-            nstep = 100000
+            nstep = 10000
             #nstep = int(self.n_sigmas*sig/(vel*dt))
             work = 0.0
 
@@ -346,7 +347,8 @@ class DimerBreak:
 
                 #if i%1000==1: print(("%6d"+"%12.8f"*6) % (i,ekin,epot,etot, work, etot + work, ekinotto))
 
-                if i % 50 == 0:
+
+                if i % 1 == 0:
                     pos1.append(x0[1])
                     pos2.append(x0[2])
 
@@ -391,6 +393,27 @@ class DimerBreak:
 
             # plt.plot(times, pos1, ls="none", marker="+", color=(0, 0.5, 0.5))
             # plt.plot(times, disp, ls="none", marker="+", color=(0.5, 0, 0.5))
+
+            # fit = []
+            #
+            # def sin_fit(tl, amp, freq, phase, offset):
+            #     q = []
+            #     for t in tl:
+            #         q.append(amp*math.sin((freq*t) + phase) - offset)
+            #     return q
+            #
+            # #p0 = [0.05, 10, -0.5, 1.125]
+            # p0 = [1, (2*pi/statistics.mean(periods)), 1, 1]
+            #
+            #
+            # parms, cov = curve_fit(sin_fit, times, disp, p0)
+            #
+            # print(parms)
+            # for t in times:
+            #     fit.append(parms[0]*math.sin((parms[1]*t) + parms[2]) - parms[3])
+            #
+            #
+            # plt.plot(times, fit, ls="none", marker="+", color=(0.5, 0, 0.5))
             # plt.show()
 
             fig = plt.figure()
