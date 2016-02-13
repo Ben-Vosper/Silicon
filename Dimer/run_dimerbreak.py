@@ -2,29 +2,29 @@ from Dimer.dimerbreak import DimerBreak
 import matplotlib.pyplot as plt
 import json, statistics
 
-results_temp = "300_s1.2_f1.json"
+results_temp = "cold_s1.1.json"
 
 v = 0.001
-v_max = 1
+v_max = 0.3
 v_inc = 0.001
 
 # Setting temperature. Using E = kB/T, E = 2.3eV, kB = 8.62e-5eVK-1
 
 p = 2.3 / 8.62e-5
 
-T = 300
+T = 0.00001
 sum_of_modes = T/p * 2
-mode_fraction = 1                # f_opt/sum_of_modes
+mode_fraction = 0.5                # f_opt/sum_of_modes
 
 f_opt = sum_of_modes*mode_fraction
 f_aco = sum_of_modes - f_opt
 
 f_timestep = 0.002
-f_stiffness = 1.2
+f_stiffness = 1.1
 
 run_info = (v, v_max, v_inc)
 
-nconfig = 100
+nconfig = 1
 
 v_list = []
 w_means = []

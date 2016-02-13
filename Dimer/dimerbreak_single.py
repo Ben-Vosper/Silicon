@@ -284,8 +284,8 @@ class DimerBreak:
             xm[1] = x0[1] + delxd[0]
             xm[2] = x0[2] + delxd[1]
 
-            #nstep = 10000
-            nstep = int(self.n_sigmas*sig/(vel*dt))
+            nstep = 100000
+            #nstep = int(self.n_sigmas*sig/(vel*dt))
             work = 0.0
 
             veldrift = zeros(4)
@@ -346,25 +346,22 @@ class DimerBreak:
 
                 #if i%1000==1: print(("%6d"+"%12.8f"*6) % (i,ekin,epot,etot, work, etot + work, ekinotto))
 
-                if i % 10 == 0:
+                if i % 50 == 0:
                     pos1.append(x0[1])
                     pos2.append(x0[2])
 
                     pos0.append(x0[0])
                     pos3.append(x0[3])
                     times.append(t)
-                #
-                # if (i - 1) == 0:
-                #     eq.append(0)
-                # else:
-                #     eq.append(eq[i - 2] + veldrift[1]*dt)
-                #
-                # disp.append((pos1[i - 1]) - (pos2[i - 1]))
-                # #print(pos1[i - 1], eq[i - 1], disp[i - 1])
-                #
-                # if i > 3:
-                #     if pos1[i - 3] < pos1[i - 2] > pos1[i - 1]:
-                #         maxes.append(t)
+
+                    i = len(pos1)
+
+                    disp.append((pos1[i - 1]) - (pos2[i - 1]))
+                    #print(pos1[i - 1], eq[i - 1], disp[i - 1])
+
+                    if i > 3:
+                        if pos1[i - 3] < pos1[i - 2] > pos1[i - 1]:
+                            maxes.append(t)
 
                 xm[:] = x0[:]
                 x0[:] = xp[:]
@@ -385,48 +382,53 @@ class DimerBreak:
                 print('DISASTER, POSITIONS: ',x0)
                 sys.exit(0)
 
-            # periods = []
-            # prev = 0
-            # for t in maxes:
-            #     periods.append(t - prev)
-            #     prev = t
-            # print(statistics.mean(periods), statistics.pstdev(periods))
-            #
+            periods = []
+            prev = 0
+            for t in maxes:
+                periods.append(t - prev)
+                prev = t
+            print(statistics.mean(periods), statistics.pstdev(periods))
+
             # plt.plot(times, pos1, ls="none", marker="+", color=(0, 0.5, 0.5))
-            # plt.plot(times, pos2, ls="none", marker="+", color=(0.5, 0, 0.5))
+            # plt.plot(times, disp, ls="none", marker="+", color=(0.5, 0, 0.5))
             # plt.show()
 
             fig = plt.figure()
-            ax = plt.axes(xlim=(-5, 5), ylim=(-2, 2))
-            atom1, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5))
-            atom2, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5))
+            param_string = "Acoustic Mode, f_aco = 0.01, Stiffness = 1.1"
+            ax = plt.axes(xlim=(-3, 3), ylim=(-2, 2))
+            fig.suptitle(param_string, fontsize=12)
+            atom1, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5), zorder=10)
+            atom2, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5), zorder=10)
 
             bond1, = ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5))
             bond2, = ax.plot([], [], ls="--", lw=2, color=(0, 1, 0.5))
             bond3, = ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5))
             wall1, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5, 0.5, 0))
             wall2, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5, 0.5, 0))
-            time_text = ax.text(-4.9, -1.9, "")
+            time_text = ax.text(-2.9, -1.6, "")
+            theoretical_period = ax.text(-2.9, -1.75, "Theoretical Period = " + str(round(per_aco, 3)))
+            period_text = ax.text(-2.9, -1.9, "")
 
             def init():
                 bond1.set_data([], [])
                 bond2.set_data([], [])
                 bond3.set_data([], [])
-                atom1.set_data([], [])
-                atom2.set_data([], [])
                 wall1.set_data([], [])
                 wall2.set_data([], [])
                 time_text.set_text('')
-                return bond1, bond2, bond3, atom1, atom1, wall1, wall2, time_text
+                period_text.set_text('')
+                atom1.set_data([], [])
+                atom2.set_data([], [])
+                return bond1, bond2, bond3, wall1, wall2, time_text, period_text, atom1, atom1
 
             # animation function.  This is called sequentially
             def animate(i):
                 x1 = pos1[i]
                 x2 = pos2[i]
                 y = 0
-                bond1x = [pos0[i], x1]
+                bond1x = [pos0[0], x1]
                 bond2x = [x1, x2]
-                bond3x = [x2, pos3[i]]
+                bond3x = [x2, pos3[0]]
                 bondy = [0, 0]
                 if abs(bond2x[0] - bond2x[1]) < 3:
                     bond2.set_data(bond2x, bondy)
@@ -440,22 +442,31 @@ class DimerBreak:
                     bond3.set_data(bond3x, bondy)
                 else:
                     bond3.set_data(0, 0)
-                atom1.set_data(x1, y)
-                atom2.set_data(x2, y)
+
                 wall1.set_data(pos0[i], y)
                 wall2.set_data(pos3[i], y)
 
-                time_text.set_text("time = " + format(times[i], ".3f"))
+                time_text.set_text("Time = " + format(times[i], ".3f"))
+                c_time = times[i]
+                c_max = 0
+                for max_i in range(len(maxes)):
+                    i = len(maxes) - max_i - 1
+                    if c_time <= maxes[i]:
+                        c_max = max_i
 
-                return bond1, bond2, bond3, atom1, atom2, wall1, wall2, time_text
+                period_text.set_text("Period = " + format(periods[c_max], ".3f"))
+                atom1.set_data(x1, y)
+                atom2.set_data(x2, y)
+
+                return bond1, bond2, bond3, wall1, wall2, time_text, period_text, atom1, atom2
 
             # call the animator.  blit=True means only re-draw the parts that have changed.
             anim = animation.FuncAnimation(fig, animate, init_func=init,
                                            frames=len(pos1), interval=1, blit=True)
-            # print(len(pos1), len(pos1)/60)
-            # anim.save('dimer.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+            print(len(pos1), len(pos1)/60)
+            anim.save('acoustic.mp4', fps=60, extra_args=['-vcodec', 'libx264'])
             plt.show()
 
 
-z = DimerBreak(0.08, 0.002, 1, 0.0225, 0.0, 1.1, "q.json", (1, 1, 1))
+z = DimerBreak(0, 0.0002, 1, 0.0, 0.01, 1.1, "q.json", (1, 1, 1))
 z.run()

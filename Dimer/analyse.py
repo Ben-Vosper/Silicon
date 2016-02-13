@@ -1,33 +1,40 @@
 import matplotlib.pyplot as plt
 import json, colorsys
+import numpy
+from scipy.ndimage import convolve1d
 
 
 def moving_average(data, window_size):
 
-    window = []
-    means = []
+    # window = []
+    # means = []
+    #
+    # if window_size % 2 == 0:
+    #     back = int((window_size / 2) - 1)
+    #     forward = int(window_size / 2)
+    # else:
+    #     back = int((window_size - 1) / 2)
+    #     forward = back
+    #
+    # for z in range(back):
+    #     window.append(-(z + 1))
+    #     means.append(0)
+    # for z in range(forward + 1):
+    #     window.append(z)
+    #
+    # for q in range(back, len(data) - forward):
+    #     current = 0
+    #     for i in window:
+    #         current += data[q + i]
+    #     means.append(current/window_size)
+    #
+    # for z in range(forward):
+    #     means.append(0)
 
-    if window_size % 2 == 0:
-        back = int((window_size / 2) - 1)
-        forward = int(window_size / 2)
-    else:
-        back = int((window_size - 1) / 2)
-        forward = back
+    # Or, do it in two lines. Ya dingus.
 
-    for z in range(back):
-        window.append(-(z + 1))
-        means.append(0)
-    for z in range(forward + 1):
-        window.append(z)
-
-    for q in range(back, len(data) - forward):
-        current = 0
-        for i in window:
-            current += data[q + i]
-        means.append(current/window_size)
-
-    for z in range(forward):
-        means.append(0)
+    kernel = (1/window_size)*numpy.ones(window_size)
+    means = convolve1d(data, kernel, mode="nearest")
 
     return means
 
@@ -89,7 +96,7 @@ def read_full_results(filename):
     f_aco = results["params"][5]
     f_opt = results["params"][4]
     mode_fraction = f_opt/(f_opt + f_aco)
-    T_approx = round(((f_opt + f_aco)/2) * 11600)
+    T_approx = round(((f_opt + f_aco)/2) * 26682.1)
     v_vals = list(results.keys())
     v_vals.remove("params")
     print(mode_fraction)
@@ -97,7 +104,7 @@ def read_full_results(filename):
     for v in sorted(v_vals):
         v_list.append(v)
         w_means.append(results[v][0])
-        w_errbar_size.append(results[v][1]/(nconfig**0.5))
+        w_errbar_size.append(results[v][1]/(results[v][2]**0.5))
 
     m_av = moving_average(w_means, 5)
     v_mins, min_vals = find_minimums(v_list, m_av)
@@ -113,13 +120,14 @@ def read_full_results(filename):
             diff_markers.append(min_vals[i] + diffs[i]*(q/10))
 
     plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")
-    plt.plot(diff_markers_v, diff_markers, ls="none", marker="o", color=(0.5, 0, 0.5))
+    plt.plot(v_list, m_av, ls="-", color=(0.5, 0, 0.5))
     plt.xlabel("$\\frac{v}{v_s}$", size=24)
     plt.ylabel("$\\bar W$ / $\epsilon$", size=18)
     param_string = "Approximate Temperature = " + str(T_approx) + "K" + "\nopt = " + str(format(f_opt, ".3g")) +\
                    "\naco = " + str(format(f_aco, ".3g")) + "\nStiffness = " + str(f_stiffness)
     plt.title(param_string, loc="left", fontsize=12)
     plt.show()
+
 
 def combine_results(filename_list):
 
@@ -149,7 +157,7 @@ def combine_results(filename_list):
         f_aco = results["params"][5]
         f_opt = results["params"][4]
         mode_fraction = f_opt/(f_opt + f_aco)
-        T_approx = round(((f_opt + f_aco)/2) * 11600)
+        T_approx = round(((f_opt + f_aco)/2) * 26682.1)
 
         v_vals = list(results.keys())
         v_vals.remove("params")
@@ -157,45 +165,41 @@ def combine_results(filename_list):
         for v in sorted(v_vals):
             v_list.append(v)
             w_means.append(results[v][0])
-            w_errbar_size.append(results[v][1]/(nconfig**0.5))
+            w_errbar_size.append(results[v][1]/(results[v][2]**0.5))
 
         m_av = moving_average(w_means, 5)
         v_mins, min_vals = find_minimums(v_list, m_av)
         v_maxes, max_vals = find_maximums(v_list, m_av)
         diffs = calculate_diffs(min_vals, max_vals)
 
-        for g in range(len(v_mins)):
-            v = float(v_mins[g])
-            if  v < 0.1:#and v > 0.2:
-                low_dif.append(diffs[g])
-                low_dif_f.append(round(mode_fraction - 0.02, 2))
+        # for g in range(len(v_mins)):
+        #     v = float(v_mins[g])
+        #     if  v < 0.1:#and v > 0.2:
+        #         low_dif.append(diffs[g])
+        #         low_dif_f.append(round(mode_fraction - 0.02, 2))
+        #
+        # diff_markers = []
+        # diff_markers_v = []
+        #
+        # for z in range(len(diffs)):
+        #     for q in range(1, 10):
+        #         diff_markers_v.append(v_mins[z])
+        #         diff_markers.append(min_vals[z] + diffs[z]*(q/10))
 
-        diff_markers = []
-        diff_markers_v = []
 
-        for z in range(len(diffs)):
-            for q in range(1, 10):
-                diff_markers_v.append(v_mins[z])
-                diff_markers.append(min_vals[z] + diffs[z]*(q/10))
-
-
-        # if i == 0:
-        #     plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+", color=colours[i])
+        plt.plot(v_list, m_av, ls="-", color=colours[i])
         #
         # plt.plot(diff_markers_v, diff_markers, ls="none", marker="o", color=colours[i])
 
-    plt.bar(low_dif_f, low_dif, 0.04, color=(0.5, 0, 0.75))
+    #plt.bar(low_dif_f, low_dif, 0.04, color=(0.5, 0, 0.75))
 
     # plt.xlabel("$\\frac{v}{v_s}$", size=24)
-    plt.xlabel("$\\frac{f_{opt}}{f_{opt} + f_{aco}}$", size=24)
-    plt.ylabel("$\Delta\\bar W$ / $\epsilon$", size=18)
-    plt.suptitle("Depth of resonance at $\\frac{v}{v_s}\\approx$0.05", fontsize=12)
+    # plt.xlabel("$\\frac{f_{opt}}{f_{opt} + f_{aco}}$", size=24)
+    # plt.ylabel("$\Delta\\bar W$ / $\epsilon$", size=18)
+    # plt.suptitle("Depth of resonance at $\\frac{v}{v_s}\\approx$0.05", fontsize=12)
     plt.show()
 
-combine_results(["Old\\300_f0.1.json", "Old\\300_f0.2_new.json", "Old\\300_f0.3_new.json",
-                 "Old\\300_f0.4_new.json", "Old\\300_f0.5_new.json", "Old\\300_f0.6_new.json",
-                 "Old\\300_f0.7_new.json", "Old\\300_f0.8_new.json", "Old\\300_f0.9_new.json",
-                 "Old\\300_f1_new.json", "Old\\300_f0_new.json"])
+combine_results(["300_s1.2_f0.json", "300_s1.2_f0.5.json", "300_s1.2_f1.json"])
 
 #read_full_results("E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\300_0.1_test.json")
-#read_full_results("Old\\300_f1_new.json")
+#read_full_results("300_s1.2_f1.json")
