@@ -32,11 +32,11 @@ class DimerBreak:
         #
         # (6) number of LJ sigmas the pulling will be taken to (must be enough to fully break the bond)
         #     the number of MD steps will be:   nstep = int(n_sigmas*sig/(vel*dt))
-        self.n_sigmas = 7
+        self.n_sigmas = 3
         print("brk dist: ", self.n_sigmas)
 
-        self.i_potential = "stiffer_lj"
-        #self.i_potential = "triple_back"
+        #self.i_potential = "stiffer_lj"
+        self.i_potential = "triple_back"
 
         self.results_temp = results_temp + "_" + str(round(self.frac_vel, 4)) + ".json"
         self.run_info = run_info
@@ -285,8 +285,8 @@ class DimerBreak:
             xm[1] = x0[1] + delxd[0]
             xm[2] = x0[2] + delxd[1]
 
-            nstep = 10000
-            #nstep = int(self.n_sigmas*sig/(vel*dt))
+            #nstep = 100000
+            nstep = int(self.n_sigmas*sig/(vel*dt))
             work = 0.0
 
             veldrift = zeros(4)
@@ -348,7 +348,7 @@ class DimerBreak:
                 #if i%1000==1: print(("%6d"+"%12.8f"*6) % (i,ekin,epot,etot, work, etot + work, ekinotto))
 
 
-                if i % 1 == 0:
+                if i % 50 == 0:
                     pos1.append(x0[1])
                     pos2.append(x0[2])
 
@@ -429,7 +429,7 @@ class DimerBreak:
             wall1, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5, 0.5, 0))
             wall2, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5, 0.5, 0))
             time_text = ax.text(-2.9, -1.6, "")
-            theoretical_period = ax.text(-2.9, -1.75, "Theoretical Period = " + str(round(per_aco, 3)))
+            theoretical_period = ax.text(-2.9, -1.75, "Theoretical Period = " + str(round(per_opt, 3)))
             period_text = ax.text(-2.9, -1.9, "")
 
             def init():
@@ -449,9 +449,9 @@ class DimerBreak:
                 x1 = pos1[i]
                 x2 = pos2[i]
                 y = 0
-                bond1x = [pos0[0], x1]
+                bond1x = [pos0[i], x1]
                 bond2x = [x1, x2]
-                bond3x = [x2, pos3[0]]
+                bond3x = [x2, pos3[i]]
                 bondy = [0, 0]
                 if abs(bond2x[0] - bond2x[1]) < 3:
                     bond2.set_data(bond2x, bondy)
@@ -487,9 +487,9 @@ class DimerBreak:
             anim = animation.FuncAnimation(fig, animate, init_func=init,
                                            frames=len(pos1), interval=1, blit=True)
             print(len(pos1), len(pos1)/60)
-            anim.save('acoustic.mp4', fps=60, extra_args=['-vcodec', 'libx264'])
+            #anim.save('acoustic.mp4', fps=60, extra_args=['-vcodec', 'libx264'])
             plt.show()
 
 
-z = DimerBreak(0, 0.0002, 1, 0.0, 0.01, 1.1, "q.json", (1, 1, 1))
+z = DimerBreak(0.01, 0.0002, 1, 0.000001, 0.000001, 1, "q.json", (1, 1, 1))
 z.run()

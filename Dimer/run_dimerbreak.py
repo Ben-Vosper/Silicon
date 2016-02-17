@@ -2,9 +2,9 @@ from Dimer.dimerbreak import DimerBreak
 import matplotlib.pyplot as plt
 import json, statistics
 
-results_temp = "cold_s1.1.json"
+results_temp = "300_f0.5_ext.json"
 
-v = 0.001
+v = 0.03
 v_max = 0.3
 v_inc = 0.001
 
@@ -12,7 +12,7 @@ v_inc = 0.001
 
 p = 2.3 / 8.62e-5
 
-T = 0.00001
+T = 300
 sum_of_modes = T/p * 2
 mode_fraction = 0.5                # f_opt/sum_of_modes
 
@@ -24,7 +24,7 @@ f_stiffness = 1.1
 
 run_info = (v, v_max, v_inc)
 
-nconfig = 1
+nconfig = 200
 
 v_list = []
 w_means = []
@@ -68,7 +68,7 @@ while v < v_max:
         with open(results_temp, 'w') as q:
             json.dump(results, q, indent=2)
 
-T_approx = round(((f_opt + f_aco)/2) * 11600)
+T_approx = round(((f_opt + f_aco)/2) * 26682.1)
 
 plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")#, color=(0, 0.5, 0.5))
 # plt.errorbar(v_list, eks, yerr=ek_ebs, ls="none", marker="+", color=(0.5, 0, 0.5))
