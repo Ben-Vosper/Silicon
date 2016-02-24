@@ -47,6 +47,8 @@ def read_full_results(filename):
         w_means.append(results[v][0])
         w_errbar_size.append(results[v][1]/(results[v][2]**0.5))
 
+    print(len(v_list))
+
     plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")
     plt.xlabel("$\\frac{v}{v_s}$", size=24)
     plt.ylabel("$\\bar W$ / $\epsilon$", size=18)
@@ -56,4 +58,4 @@ def read_full_results(filename):
     plt.show()
 
 #read_full_results("E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\cold_v3_vel_drift.json")
-read_full_results("300_triple_f1.json")
+read_full_results("Results\\300_f0.5.json")
