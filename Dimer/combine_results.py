@@ -6,10 +6,10 @@ import json, colorsys, numpy, statistics
 def combine_results(filename_list):
 
     patches = []
-    custom_names = ["1.2", "1.1"]
+    custom_names = ["1.05", "1.10", "1.20"]
 
     colours = []
-    colour_offset = 0.1
+    colour_offset = 0.07
     n = len(filename_list)
     for q in range(n):
         z = colour_offset + q/n
@@ -53,7 +53,7 @@ def combine_results(filename_list):
     param_string = "Approximate Temperature = " + str(T_approx) + "K" + "\nopt = " + str(format(f_opt, ".3g")) +\
                "\naco = " + str(format(f_aco, ".3g"))
     plt.title(param_string, loc="left", fontsize=12)
-    #plt.legend(handles=patches, title="Stiffness", loc="upper left", fontsize=12)
+    plt.legend(handles=patches, title="Stiffness", loc="upper left", fontsize=12)
     plt.show()
 
 
@@ -163,7 +163,7 @@ def combine_runs(filename_list):
 # combine_results(["cold_s1.2.json", "cold_s1.1.json"])
 
 
-combine_runs(["Results\\300_f1.json", "300_f1_ext.json"])
-#combine_results(["Results\\300_f0.5.json", "300_f0.5_ext.json"])
+#combine_runs(["Results\\300_f1.json", "300_f1_ext.json"])
+combine_results(["cold_s1.05.json", "Results\\cold_s1.1.json", "Results\\cold_s1.2.json"])
 
 #"E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\300_0.1_test.json"

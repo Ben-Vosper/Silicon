@@ -33,8 +33,8 @@ class DimerBreak:
         self.n_sigmas = 7.0
         print("brk dist: ", self.n_sigmas)
 
-        self.i_potential = "stiffer_lj"
-        #self.i_potential = "triple_back"
+        #self.i_potential = "stiffer_lj"
+        self.i_potential = "triple_back"
 
         self.results_temp = results_temp + "_" + str(round(self.frac_vel, 4)) + ".json"
         self.run_info = run_info

@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.image as mpimg
 import os, json, statistics, time
 from pylab import *
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import animation
 from scipy.optimize import curve_fit
 
@@ -108,7 +110,7 @@ class DimerBreak:
         d_eq = sig*2.**(1./6.)
         d_lat = d_eq*2.*(2**.5)/3.0    # tetrahedron base radius, if d_eq is the tetrahedron radius
 
-        r =  xdum[2] - xdum[1]
+        r = xdum[2] - xdum[1]
         en = en + 4.0*eps[1]*( (sig/r)**12 - (sig/r)**6)
         fc[1] = 4.0*eps[1]*(-12.0*(sig/r)**13 +6.0*(sig/r)**7)/sig
         fc[2] = -fc[1]
@@ -347,8 +349,7 @@ class DimerBreak:
 
                 #if i%1000==1: print(("%6d"+"%12.8f"*6) % (i,ekin,epot,etot, work, etot + work, ekinotto))
 
-
-                if i % 5 == 0:
+                if i % 10 == 0:
                     pos1.append(x0[1])
                     pos2.append(x0[2])
 
@@ -415,78 +416,173 @@ class DimerBreak:
             # plt.plot(times, fit, ls="none", marker="+", color=(0.5, 0, 0.5))
             # plt.show()
 
-            fig = plt.figure()
             param_string = "Optical Mode, f_opt = 0.005, Stiffness = 1.0"
-            ax = plt.axes(xlim=(-3, 3), ylim=(-2, 2))
+            fig = plt.figure()
+            ax = fig.add_axes([0, 0, 1, 1], projection='3d')
+            plt.xlabel("x")
+            plt.ylabel("y")
+            #ax.axis('off')
             fig.suptitle(param_string, fontsize=12)
-            atom1, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5), zorder=10)
-            atom2, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5), zorder=10)
+            x_init = [-0.5*d_eq, 0.5*d_eq]
+            y0 = [0, 0]
+            z0 = [0, 0]
+            d_lat = d_eq*(2/3)*(2**0.5)
+            x_bb_rel = [-d_lat/3, -d_lat/3, -d_lat/3, d_lat/3, d_lat/3, d_lat/3]
+            y_bb_rel = [d_lat, -d_lat, 0, -d_lat, d_lat, 0]
+            z_bb_rel = [-d_lat, -d_lat, d_lat, d_lat, d_lat, -d_lat]
 
-            bond1, = ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5))
-            bond2, = ax.plot([], [], ls="--", lw=2, color=(0, 1, 0.5))
-            bond3, = ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5))
-            wall1, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5, 0.5, 0))
-            wall2, = ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5, 0.5, 0))
-            time_text = ax.text(-2.9, -1.6, "")
-            theoretical_period = ax.text(-2.9, -1.75, "Theoretical Period = " + str(round(per_opt, 3)))
-            period_text = ax.text(-2.9, -1.9, "")
+            # Set up figure & 3D axis for animation
+
+            ax.set_xlim((-5, 5))
+            ax.set_ylim((-3, 3))
+            ax.set_zlim((-3, 3))
+
+            atoms = [ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5), zorder=10),
+                     ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5), zorder=10)]
+
+            bonds = [ax.plot([], [], ls="--", lw=2, color=(0, 1, 0.5))]
+
+            back_atoms = [ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5,0.5, 0), zorder=9)]
+            back_bonds = [ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5))]
+            for q in range(5):
+                back_atoms.append(ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5,0.5, 0), zorder=9))
+                back_bonds.append(ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5)))
+
+            ax.view_init(25, 125)
+            self.broken = False
+            text = True
+
+            if text:
+                time_text = ax.text(4.9, -3, 3, "")
+                theoretical_period = ax.text(4.9, -3, 2.6, "Theoretical Period = " + str(round(per_opt, 3)))
+                period_text = ax.text(4.9, -3, 2.2, "")
 
             def init():
-                bond1.set_data([], [])
-                bond2.set_data([], [])
-                bond3.set_data([], [])
-                wall1.set_data([], [])
-                wall2.set_data([], [])
-                atom1.set_data([], [])
-                atom2.set_data([], [])
-                return bond1, bond2, bond3, wall1, wall2, time_text, period_text, atom1, atom1
+                elements = []
+                for atom in atoms:
+                    atom = atom[0]
+                    atom.set_data([], [])
+                    atom.set_3d_properties([])
+                    elements.append(atom)
 
-            # animation function.  This is called sequentially
+                for bond in bonds:
+                    bond = bond[0]
+                    bond.set_data([], [])
+                    bond.set_3d_properties([])
+                    elements.append(bond)
+
+                for atom in back_atoms:
+                    atom = atom[0]
+                    atom.set_data([], [])
+                    atom.set_3d_properties([])
+                    elements.append(atom)
+
+                for bond in back_bonds:
+                    bond = bond[0]
+                    bond.set_data([], [])
+                    bond.set_3d_properties([])
+                    elements.append(bond)
+
+                if text:
+                    time_text.set_text('')
+                    period_text.set_text('')
+                    elements.append(time_text)
+                    elements.append(period_text)
+
+                return elements
+
             def animate(i):
-                x1 = pos1[i]
-                x2 = pos2[i]
-                y = 0
-                bond1x = [pos0[i], x1]
-                bond2x = [x1, x2]
-                bond3x = [x2, pos3[i]]
-                bondy = [0, 0]
-                if abs(bond2x[0] - bond2x[1]) < 3:
-                    bond2.set_data(bond2x, bondy)
-                else:
-                    bond2.set_data(0, 0)
-                if abs(bond1x[0] - bond1x[1]) < 3:
-                    bond1.set_data(bond1x, bondy)
-                else:
-                    bond1.set_data(0, 0)
-                if abs(bond3x[0] - bond3x[1]) < 3:
-                    bond3.set_data(bond3x, bondy)
-                else:
-                    bond3.set_data(0, 0)
+                elements = []
 
-                wall1.set_data(pos0[i], y)
-                wall2.set_data(pos3[i], y)
+                bondx = []
+                bondy = []
+                bondz = []
+                for q in range(len(bonds)):
+                    bondx.append([pos1[i], pos2[i]])
+                    bondy.append([y0[q], y0[q]])
+                    bondz.append([z0[q], z0[q]])
+                for bond in bonds:
+                    q = bonds.index(bond)
+                    bond = bond[0]
+                    if abs(bondx[0][0] - bondx[0][1]) < 3 and not self.broken:
+                        bond.set_data(bondx[q], bondy[q])
+                        bond.set_3d_properties(bondz[q])
+                        elements.append(bond)
+                    else:
+                        bond.set_data(0, 0)
+                        bond.set_3d_properties(0)
+                        self.broken = True
 
-                time_text.set_text("Time = " + format(times[i], ".3f"))
-                c_time = times[i]
-                c_max = 0
-                for max_i in range(len(maxes)):
-                    i = len(maxes) - max_i - 1
-                    if c_time <= maxes[i]:
-                        c_max = max_i
+                x_bb = []
+                y_bb = []
+                z_bb = []
+                for q in range(6):
+                    if q < 3:
+                        x_bb.append(pos0[i])
+                        y_bb.append(y_bb_rel[q] + y0[0])
+                        z_bb.append(z_bb_rel[q] + z0[0])
+                    else:
+                        x_bb.append(pos3[i])
+                        y_bb.append(y_bb_rel[q] + y0[1])
+                        z_bb.append(z_bb_rel[q] + z0[1])
+                bondx = []
+                bondy = []
+                bondz = []
+                for q in range(len(back_bonds)):
+                    if q < 3:
+                        bondx.append([x_bb[q], pos1[i]])
+                        bondy.append([y_bb[q], y0[0]])
+                        bondz.append([z_bb[q], z0[0]])
+                    else:
+                        bondx.append([x_bb[q], pos2[i]])
+                        bondy.append([y_bb[q], y0[1]])
+                        bondz.append([z_bb[q], z0[1]])
+                for bond in back_bonds:
+                    q = back_bonds.index(bond)
+                    bond = bond[0]
+                    bond.set_data(bondx[q], bondy[q])
+                    bond.set_3d_properties(bondz[q])
+                    elements.append(bond)
 
-                period_text.set_text("Period = " + format(periods[c_max], ".3f"))
-                atom1.set_data(x1, y)
-                atom2.set_data(x2, y)
+                for atom in atoms:
+                    q = atoms.index(atom)
+                    atom = atom[0]
+                    if q == 0:
+                        atom.set_data([pos1[i]], [y0[q]])
+                    else:
+                        atom.set_data([pos2[i]], [y0[q]])
+                    atom.set_3d_properties([z0[q]])
+                    elements.append(atom)
 
-                return bond1, bond2, bond3, wall1, wall2, time_text, period_text, atom1, atom2
+                for atom in back_atoms:
+                    q = back_atoms.index(atom)
+                    atom = atom[0]
+                    atom.set_data([x_bb[q]], [y_bb[q]])
+                    atom.set_3d_properties([z_bb[q]])
+                    elements.append(atom)
 
-            # call the animator.  blit=True means only re-draw the parts that have changed.
+                if text:
+                    time_text.set_text("Time = " + format(times[i], ".3f"))
+                    c_time = times[i]
+                    c_max = 0
+                    for max_i in range(len(maxes)):
+                        q = len(maxes) - max_i - 1
+                        if c_time <= maxes[q]:
+                            c_max = max_i
+                    period_text.set_text("Period = " + format(periods[c_max], ".3f"))
+                    elements.append(time_text)
+                    elements.append(period_text)
+
+                ax.view_init(25, 125 - 60*(i/len(pos1)))
+                fig.canvas.draw()
+                return elements
+
             anim = animation.FuncAnimation(fig, animate, init_func=init,
                                            frames=len(pos1), interval=1, blit=True)
             print(len(pos1), len(pos1)/60)
-            anim.save('optical_TB.mp4', fps=60, extra_args=['-vcodec', 'libx264'])
+            #anim.save('optical_TB.mp4', fps=60, extra_args=['-vcodec', 'libx264'])
             plt.show()
 
 
-z = DimerBreak(0, 0.002, 1, 0.005, 0.0, 1, "q.json", (1, 1, 1))
+z = DimerBreak(0.0, 0.002, 1, 0.005, 0.0, 1, "q.json", (1, 1, 1))
 z.run()
