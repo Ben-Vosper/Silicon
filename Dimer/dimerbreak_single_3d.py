@@ -349,7 +349,7 @@ class DimerBreak:
 
                 #if i%1000==1: print(("%6d"+"%12.8f"*6) % (i,ekin,epot,etot, work, etot + work, ekinotto))
 
-                if i % 10 == 0:
+                if i % 1 == 0:
                     pos1.append(x0[1])
                     pos2.append(x0[2])
 
@@ -416,7 +416,7 @@ class DimerBreak:
             # plt.plot(times, fit, ls="none", marker="+", color=(0.5, 0, 0.5))
             # plt.show()
 
-            param_string = "Optical Mode, f_opt = 0.005, Stiffness = 1.0"
+            param_string = "Optical Mode: f_opt = 0.005, Stiffness = 1.0"
             fig = plt.figure()
             ax = fig.add_axes([0, 0, 1, 1], projection='3d')
             plt.xlabel("x")
@@ -437,20 +437,20 @@ class DimerBreak:
             ax.set_ylim((-3, 3))
             ax.set_zlim((-3, 3))
 
-            atoms = [ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5), zorder=10),
-                     ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0, 0.5, 0.5), zorder=10)]
+            atom_colours = [(0, 0.5, 0.5), (0, 0.5, 0.5),
+                            (0.5, 0.5, 0), (0.5, 0.5, 0), (0.5, 0.5, 0),
+                            (0.5, 0.5, 0), (0.5, 0.5, 0), (0.5, 0.5, 0)]
+            atoms = Axes3D.scatter(ax, [], [], [], c=atom_colours, s=200, depthshade=False)
 
-            bonds = [ax.plot([], [], ls="--", lw=2, color=(0, 1, 0.5))]
-
-            back_atoms = [ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5,0.5, 0), zorder=9)]
-            back_bonds = [ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5))]
+            bonds = [ax.plot([], [], ls="--", lw=2, color=(0, 1, 0.5), zorder=-1)]
+            back_bonds = [ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5), zorder=-1)]
             for q in range(5):
-                back_atoms.append(ax.plot([], [], ls="none",  marker='o', markersize=20, color=(0.5,0.5, 0), zorder=9))
-                back_bonds.append(ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5)))
+                back_bonds.append(ax.plot([], [], ls="-", lw=2, color=(1, 0, 0.5), zorder=-1))
 
-            ax.view_init(25, 125)
+            ax.view_init(25, 100)
             self.broken = False
             text = True
+            speed_factor = 15
 
             if text:
                 time_text = ax.text(4.9, -3, 3, "")
@@ -459,11 +459,6 @@ class DimerBreak:
 
             def init():
                 elements = []
-                for atom in atoms:
-                    atom = atom[0]
-                    atom.set_data([], [])
-                    atom.set_3d_properties([])
-                    elements.append(atom)
 
                 for bond in bonds:
                     bond = bond[0]
@@ -471,17 +466,14 @@ class DimerBreak:
                     bond.set_3d_properties([])
                     elements.append(bond)
 
-                for atom in back_atoms:
-                    atom = atom[0]
-                    atom.set_data([], [])
-                    atom.set_3d_properties([])
-                    elements.append(atom)
-
                 for bond in back_bonds:
                     bond = bond[0]
                     bond.set_data([], [])
                     bond.set_3d_properties([])
                     elements.append(bond)
+
+                atoms._offsets3d = ([], [], [])
+                elements.append(atoms)
 
                 if text:
                     time_text.set_text('')
@@ -492,6 +484,7 @@ class DimerBreak:
                 return elements
 
             def animate(i):
+                i *= speed_factor
                 elements = []
 
                 bondx = []
@@ -516,7 +509,7 @@ class DimerBreak:
                 x_bb = []
                 y_bb = []
                 z_bb = []
-                for q in range(6):
+                for q in range(len(back_bonds)):
                     if q < 3:
                         x_bb.append(pos0[i])
                         y_bb.append(y_bb_rel[q] + y0[0])
@@ -544,22 +537,29 @@ class DimerBreak:
                     bond.set_3d_properties(bondz[q])
                     elements.append(bond)
 
-                for atom in atoms:
-                    q = atoms.index(atom)
-                    atom = atom[0]
+                atomx = []
+                atomy = []
+                atomz = []
+                for q in range(8):
                     if q == 0:
-                        atom.set_data([pos1[i]], [y0[q]])
+                        atomx.append(pos1[i])
+                        atomy.append(y0[0])
+                        atomz.append(z0[0])
+                    elif q == 1:
+                        atomx.append(pos2[i])
+                        atomy.append(y0[1])
+                        atomz.append(z0[1])
+                    elif 1 < q > 4:
+                        atomx.append(pos3[i])
+                        atomy.append(y_bb_rel[q - 2] + y0[1])
+                        atomz.append(z_bb_rel[q - 2] + z0[1])
                     else:
-                        atom.set_data([pos2[i]], [y0[q]])
-                    atom.set_3d_properties([z0[q]])
-                    elements.append(atom)
+                        atomx.append(pos0[i])
+                        atomy.append(y_bb_rel[q - 2] + y0[0])
+                        atomz.append(z_bb_rel[q - 2] + z0[0])
 
-                for atom in back_atoms:
-                    q = back_atoms.index(atom)
-                    atom = atom[0]
-                    atom.set_data([x_bb[q]], [y_bb[q]])
-                    atom.set_3d_properties([z_bb[q]])
-                    elements.append(atom)
+                atoms._offsets3d = (atomx, atomy, atomz)
+                elements.append(atoms)
 
                 if text:
                     time_text.set_text("Time = " + format(times[i], ".3f"))
@@ -573,16 +573,17 @@ class DimerBreak:
                     elements.append(time_text)
                     elements.append(period_text)
 
-                ax.view_init(25, 125 - 60*(i/len(pos1)))
+                #ax.view_init(25, 125 - 60*(i/len(pos1)))
                 fig.canvas.draw()
                 return elements
 
+            n_frames = int(len(pos1)/speed_factor)
             anim = animation.FuncAnimation(fig, animate, init_func=init,
-                                           frames=len(pos1), interval=1, blit=True)
-            print(len(pos1), len(pos1)/60)
-            #anim.save('optical_TB.mp4', fps=60, extra_args=['-vcodec', 'libx264'])
+                                           frames=n_frames, interval=1, blit=True)
+            print(n_frames, n_frames/60)
+            #anim.save('optical_3D_15.mp4', fps=60, extra_args=['-vcodec', 'libx264'])
             plt.show()
 
 
-z = DimerBreak(0.0, 0.002, 1, 0.005, 0.0, 1, "q.json", (1, 1, 1))
+z = DimerBreak(0.0, 0.002, 1, 0.05, 0.0, 1, "q.json", (1, 1, 1))
 z.run()
