@@ -1,9 +1,10 @@
 from Dimer.dimerbreak import DimerBreak
 import matplotlib.pyplot as plt
 import json, os
+import statistics
 
-main_results = "resume_test.json"
-inc_results = "test_0.07.json"
+main_results = "600_s1.1_opt.json"
+inc_results = "600_s1.1_opt_0.018.json"
 
 with open(main_results, 'r') as q:
     results = json.load(q)
@@ -42,19 +43,27 @@ if inc_results:
         inc = json.load(q)
         remaining_runs = nconfig - len(inc)
 
-        t = DimerBreak(current_v, f_timestep, remaining_runs, f_opt, f_aco, f_stiffness, inc_results, run_info)
-        w_mean, w_dev = t.run()
+    t = DimerBreak(current_v, f_timestep, remaining_runs, f_opt, f_aco, f_stiffness, main_results.replace(".json", ""), run_info)
+    works = t.run()
 
-        results[v] = (w_mean, w_dev)
+    n_successful_runs = len(works)
+
+    if n_successful_runs == 0:
+        print("Stiff bond(s) broke for every config at v = " + str(v))
+        v = v_max
+    else:
+        w_mean = statistics.mean(works)
+        w_dev = statistics.pstdev(works)
+
+        results[v] = (w_mean, w_dev, n_successful_runs)
 
         w_means.append(w_mean)
-        w_errbar_size.append(w_dev/(nconfig**0.5))
+        w_errbar_size.append(w_dev/(n_successful_runs**0.5))
 
         v_list.append(v)
         v += v_inc
 
         breaks += 1
-        #print(str(round((breaks/total_breaks)*100, 2)) + "%   Complete.")
 
         with open(main_results, 'w') as q:
             json.dump(results, q, indent=2)
@@ -63,22 +72,30 @@ if inc_results:
 
 while v < v_max:
 
-    t = DimerBreak(v, f_timestep, nconfig, f_opt, f_aco, f_stiffness, "test",  run_info)
-    w_mean, w_dev = t.run()
+    t = DimerBreak(v, f_timestep, nconfig, f_opt, f_aco, f_stiffness, main_results.replace(".json", ""),  run_info)
+    works = t.run()
 
-    results[v] = (w_mean, w_dev)
+    n_successful_runs = len(works)
 
-    w_means.append(w_mean)
-    w_errbar_size.append(w_dev/(nconfig**0.5))
+    if n_successful_runs == 0:
+        print("Stiff bond(s) broke for every config at v = " + str(v))
+        v = v_max
+    else:
+        w_mean = statistics.mean(works)
+        w_dev = statistics.pstdev(works)
 
-    v_list.append(v)
-    v += v_inc
+        results[v] = (w_mean, w_dev, n_successful_runs)
 
-    breaks += 1
-    #print(str(round((breaks/total_breaks)*100, 2)) + "%   Complete.")
+        w_means.append(w_mean)
+        w_errbar_size.append(w_dev/(n_successful_runs**0.5))
 
-    with open(main_results, 'w') as q:
-        json.dump(results, q, indent=2)
+        v_list.append(v)
+        v += v_inc
+
+        breaks += 1
+
+        with open(main_results, 'w') as q:
+            json.dump(results, q, indent=2)
 
 
 plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")

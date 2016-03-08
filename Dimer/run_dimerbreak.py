@@ -2,29 +2,33 @@ from Dimer.dimerbreak import DimerBreak
 import matplotlib.pyplot as plt
 import json, statistics
 
-results_temp = "cold_TB_s1.2.json"
+results_temp = "600_triple_aco.json"
 
-v = 0.005
+v_start = 0.005
+v = v_start
 v_max = 0.2
 v_inc = 0.001
 
 # Setting temperature. Using E = kB/T, E = 2.3eV, kB = 8.62e-5eVK-1
 
-p = 2.3 / 8.62e-5
+e_si_si = 2.3
+kB = 8.62e-5
 
-T = 0.00001
-sum_of_modes = T/p * 2
-mode_fraction = 0.5                # f_opt/sum_of_modes
+T = 600
 
-f_opt = sum_of_modes*mode_fraction
-f_aco = sum_of_modes - f_opt
+e_av = (0.5 * kB * T)/e_si_si
+optical_fraction = 0
+acoustic_fraction = 1
+
+f_opt = e_av * optical_fraction
+f_aco = e_av * acoustic_fraction
 
 f_timestep = 0.002
-f_stiffness = 1.2
+f_stiffness = 1.0
 
 run_info = (v, v_max, v_inc)
 
-nconfig = 1
+nconfig = 100
 
 v_list = []
 w_means = []
@@ -44,6 +48,9 @@ ep_ebs = []
 while v < v_max:
 
     t = DimerBreak(v, f_timestep, nconfig, f_opt, f_aco, f_stiffness, results_temp.replace(".json", ""),  run_info)
+    if v == v_start:
+        print(" -!-!-!- Mode = ", t.i_potential, " -!-!-!-")
+        input("Continue?")
     works = t.run()
 
     n_successful_runs = len(works)
@@ -68,7 +75,7 @@ while v < v_max:
         with open(results_temp, 'w') as q:
             json.dump(results, q, indent=2)
 
-T_approx = round(((f_opt + f_aco)/2) * 26682.1)
+T_approx = round(max([f_aco, f_opt]) / 1.874e-5)
 
 plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")#, color=(0, 0.5, 0.5))
 # plt.errorbar(v_list, eks, yerr=ek_ebs, ls="none", marker="+", color=(0.5, 0, 0.5))

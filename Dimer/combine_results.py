@@ -6,7 +6,7 @@ import json, colorsys, numpy, statistics
 def combine_results(filename_list):
 
     patches = []
-    custom_names = ["1.05", "1.10", "1.20"]
+    custom_names = ["1.1", "1.2"]
 
     colours = []
     colour_offset = 0.07
@@ -32,7 +32,7 @@ def combine_results(filename_list):
             f_stiffness = results["params"][6]
             f_aco = results["params"][5]
             f_opt = results["params"][4]
-            T_approx = round(((f_opt + f_aco)/2) * 26682.1)
+            T_approx = round(max([f_aco, f_opt]) / 1.874e-5)
 
         v_vals = list(results.keys())
         v_vals.remove("params")
@@ -98,7 +98,7 @@ def combine_runs(filename_list):
             f_stiffness = results["params"][6]
             f_aco = results["params"][5]
             f_opt = results["params"][4]
-            T_approx = round(((f_opt + f_aco)/2) * 26682.1)
+            T_approx = round(max([f_aco, f_opt]) / 1.874e-5)
 
         del results["params"]
 
@@ -155,15 +155,15 @@ def combine_runs(filename_list):
 
 
 #
-# combine_results(["Old\\300_triple_f0.json", "Old\\300_triple_f0.1.json", "Old\\300_triple_f0.2.json", "Old\\300_triple_f0.3.json",
-#                  "Old\\300_triple_f0.4.json", "Old\\300_triple_f0.5.json", "Old\\300_triple_f0.6.json",
+# combine_results(["Old\\1200_triple_aco.json", "Old\\300_triple_f0.1.json", "Old\\300_triple_f0.2.json", "Old\\300_triple_f0.3.json",
+#                  "Old\\300_triple_f0.4.json", "Old\\600_triple_mix.json", "Old\\300_triple_f0.6.json",
 #                  "Old\\300_triple_f0.7.json", "Old\\300_triple_f0.8.json", "Old\\300_triple_f0.9.json",
-#                  "Old\\300_triple_f1.json"])
+#                  "Old\\1200_triple_opt.json"])
 
 # combine_results(["cold_s1.2.json", "cold_s1.1.json"])
 
 
-#combine_runs(["Results\\300_f1.json", "300_f1_ext.json"])
-combine_results(["cold_s1.05.json", "Results\\cold_s1.1.json", "Results\\cold_s1.2.json"])
+combine_runs(["Results\\600_s1.1_mix.json", "Results\\600_s1.1_mix_ext.json"])
+#combine_results(["Results\\1200_s1.1_opt.json", "Results\\1200_s1.2_opt.json"])
 
 #"E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\300_0.1_test.json"

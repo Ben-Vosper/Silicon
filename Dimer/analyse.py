@@ -96,7 +96,7 @@ def read_full_results(filename):
     f_aco = results["params"][5]
     f_opt = results["params"][4]
     mode_fraction = f_opt/(f_opt + f_aco)
-    T_approx = round(((f_opt + f_aco)/2) * 26682.1)
+    T_approx = round(max([f_aco, f_opt]) / 1.874e-5)
     v_vals = list(results.keys())
     v_vals.remove("params")
     print(mode_fraction)
@@ -157,7 +157,7 @@ def combine_results(filename_list):
         f_aco = results["params"][5]
         f_opt = results["params"][4]
         mode_fraction = f_opt/(f_opt + f_aco)
-        T_approx = round(((f_opt + f_aco)/2) * 26682.1)
+        T_approx = round(max([f_aco, f_opt]) / 1.874e-5)
 
         v_vals = list(results.keys())
         v_vals.remove("params")
@@ -199,7 +199,7 @@ def combine_results(filename_list):
     # plt.suptitle("Depth of resonance at $\\frac{v}{v_s}\\approx$0.05", fontsize=12)
     plt.show()
 
-combine_results(["300_s1.2_f0.json", "300_s1.2_f0.5.json", "300_s1.2_f1.json"])
+combine_results(["1200_s1.2_aco.json", "600_s1.2_mix.json", "1200_s1.2_opt.json"])
 
 #read_full_results("E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\300_0.1_test.json")
-#read_full_results("300_s1.2_f1.json")
+#read_full_results("1200_s1.2_opt.json")

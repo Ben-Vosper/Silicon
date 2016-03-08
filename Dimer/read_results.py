@@ -38,7 +38,7 @@ def read_full_results(filename):
     f_stiffness = results["params"][6]
     f_aco = results["params"][5]
     f_opt = results["params"][4]
-    T_approx = round(((f_opt + f_aco)/2) * 26682.1)
+    T_approx = round(max([f_aco, f_opt]) / 1.874e-5)
     v_vals = list(results.keys())
     v_vals.remove("params")
 
@@ -58,4 +58,4 @@ def read_full_results(filename):
     plt.show()
 
 #read_full_results("E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\cold_v3_vel_drift.json")
-read_full_results("Results\\300_f0.5.json")
+read_full_results("600_triple_opt.json")
