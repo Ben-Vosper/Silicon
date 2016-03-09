@@ -450,7 +450,7 @@ class DimerBreak:
             ax.view_init(25, 100)
             self.broken = False
             text = True
-            speed_factor = 15
+            speed_factor = 20
 
             if text:
                 time_text = ax.text(4.9, -3, 3, "")
@@ -484,6 +484,9 @@ class DimerBreak:
                 return elements
 
             def animate(i):
+
+                if i == 0:
+                    self.broken = False
                 i *= speed_factor
                 elements = []
 
@@ -585,5 +588,5 @@ class DimerBreak:
             plt.show()
 
 
-z = DimerBreak(0.0, 0.002, 1, 0.05, 0.0, 1, "q.json", (1, 1, 1))
+z = DimerBreak(0.02, 0.002, 1, 0.05, 0.0, 1, "q.json", (1, 1, 1))
 z.run()
