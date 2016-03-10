@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import json, os
 import statistics
 
-main_results = "600_s1.1_opt.json"
+main_results = "300_s1.1_opt.json"
 inc_results = "600_s1.1_opt_0.018.json"
 
 with open(main_results, 'r') as q:

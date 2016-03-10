@@ -2,7 +2,7 @@ from Dimer.dimerbreak import DimerBreak
 import matplotlib.pyplot as plt
 import json, statistics
 
-results_temp = "600_triple_aco.json"
+results_temp = "600_s1.1_aco.json"
 
 v_start = 0.005
 v = v_start
@@ -16,7 +16,7 @@ kB = 8.62e-5
 
 T = 600
 
-e_av = (0.5 * kB * T)/e_si_si
+e_av = (kB * T)/e_si_si
 optical_fraction = 0
 acoustic_fraction = 1
 
@@ -24,7 +24,7 @@ f_opt = e_av * optical_fraction
 f_aco = e_av * acoustic_fraction
 
 f_timestep = 0.002
-f_stiffness = 1.0
+f_stiffness = 1.1
 
 run_info = (v, v_max, v_inc)
 
@@ -75,7 +75,7 @@ while v < v_max:
         with open(results_temp, 'w') as q:
             json.dump(results, q, indent=2)
 
-T_approx = round(max([f_aco, f_opt]) / 1.874e-5)
+T_approx = round(max([f_aco, f_opt]) / 3.747e-5)
 
 plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")#, color=(0, 0.5, 0.5))
 # plt.errorbar(v_list, eks, yerr=ek_ebs, ls="none", marker="+", color=(0.5, 0, 0.5))
