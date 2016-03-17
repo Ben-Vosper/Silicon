@@ -44,7 +44,7 @@ def read_full_results(filename):
     v_vals.remove("params")
 
     rescaled_v_vals = rescale(v_vals, f_stiffness, "stiffer_lj")
-    # rescaled_v_vals = v_vals
+    #rescaled_v_vals = v_vals
 
     for v in v_vals:
         v_list.append(rescaled_v_vals[v_vals.index(v)])
@@ -98,4 +98,4 @@ def rescale(v_vals, stiffness, mode):
     return v_list
 
 #read_full_results("E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\cold_v3_vel_drift.json")
-read_full_results("600_s1.1_mix.json")
+read_full_results("300_s1.1_mix.json")

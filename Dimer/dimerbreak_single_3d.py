@@ -287,8 +287,8 @@ class DimerBreak:
             xm[1] = x0[1] + delxd[0]
             xm[2] = x0[2] + delxd[1]
 
-            nstep = 10000
-            #nstep = int(self.n_sigmas*sig/(vel*dt))
+            #nstep = 10000
+            nstep = int(self.n_sigmas*sig/(vel*dt))
             work = 0.0
 
             veldrift = zeros(4)
@@ -450,7 +450,7 @@ class DimerBreak:
             ax.view_init(25, 100)
             self.broken = False
             text = True
-            speed_factor = 20
+            speed_factor = 5
 
             if text:
                 time_text = ax.text(4.9, -3, 3, "")
@@ -588,5 +588,5 @@ class DimerBreak:
             plt.show()
 
 
-z = DimerBreak(0.02, 0.002, 1, 0.05, 0.0, 1, "q.json", (1, 1, 1))
+z = DimerBreak(0.1, 0.002, 1, 0.0, 0.022, 1.0, "q.json", (1, 1, 1))
 z.run()

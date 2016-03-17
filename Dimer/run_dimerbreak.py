@@ -2,14 +2,14 @@ from Dimer.dimerbreak import DimerBreak
 import matplotlib.pyplot as plt
 import json, statistics
 
-results_temp = "600_s1.1_aco.json"
+results_temp = "t.json"
 
-v_start = 0.005
+v_start = 0.1
 v = v_start
-v_max = 0.2
-v_inc = 0.001
+v_max = 0.3
+v_inc = 0.01
 
-# Setting temperature. Using E = kB/T, E = 2.3eV, kB = 8.62e-5eVK-1
+# Setting temperature. Using E = kBT, E = 2.3eV, kB = 8.62e-5eVK-1
 
 e_si_si = 2.3
 kB = 8.62e-5
@@ -17,7 +17,7 @@ kB = 8.62e-5
 T = 600
 
 e_av = (kB * T)/e_si_si
-optical_fraction = 0
+optical_fraction = 1
 acoustic_fraction = 1
 
 f_opt = e_av * optical_fraction
@@ -28,7 +28,7 @@ f_stiffness = 1.1
 
 run_info = (v, v_max, v_inc)
 
-nconfig = 100
+nconfig = 5
 
 v_list = []
 w_means = []
@@ -54,6 +54,7 @@ while v < v_max:
     works = t.run()
 
     n_successful_runs = len(works)
+    print(n_successful_runs)
 
     if n_successful_runs == 0:
         print("Stiff bond(s) broke for every config at v = " + str(v))

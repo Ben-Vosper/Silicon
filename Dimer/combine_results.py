@@ -7,7 +7,7 @@ from pylab import *
 def combine_results(filename_list):
 
     patches = []
-    custom_names = ["1.1", "1.2"]
+    custom_names = ["300", "600"]
 
     colours = []
     colour_offset = 0.07
@@ -58,7 +58,7 @@ def combine_results(filename_list):
     param_string = "Approximate Temperature = " + str(T_approx) + "K" + "\nopt = " + str(format(f_opt, ".3g")) +\
                "\naco = " + str(format(f_aco, ".3g"))
     plt.title(param_string, loc="left", fontsize=12)
-    plt.legend(handles=patches, title="Stiffness", loc="upper left", fontsize=12)
+    plt.legend(handles=patches, title="Temp / K", loc="upper left", fontsize=12)
     plt.show()
 
 
@@ -89,6 +89,8 @@ def combine_runs(filename_list):
             mean_to_combine.pop(1)
         return sd_to_combine[0]/(nc[0]**0.5)
 
+    rescale = True
+
     all_vs = []
     data = []
 
@@ -106,6 +108,9 @@ def combine_runs(filename_list):
             T_approx = round(max([f_aco, f_opt]) / 3.747e-5)
 
         del results["params"]
+
+        if rescale:
+            results = rescale_file(results, 1.1, "stiffer_lj")
 
         data.append(results)
 
@@ -147,7 +152,10 @@ def combine_runs(filename_list):
     #print(len(v_list), len(w_means), len(w_errbar_size))
 
     plt.errorbar(v_list, w_means, yerr=w_errbar_size, ls="none", marker="+")
-    plt.xlabel("$\\frac{v}{v_s}$", size=24)
+    if rescale:
+        plt.xlabel("$\\frac{v}{v_R}$", size=24)
+    else:
+        plt.xlabel("$\\frac{v}{v_s}$", size=24)
     plt.ylabel("$\\bar W$ / $\epsilon$", size=18)
     param_string = "Approximate Temperature = " + str(T_approx) + "K" + "\nopt = " + str(format(f_opt, ".3g")) +\
                "\naco = " + str(format(f_aco, ".3g"))
@@ -191,6 +199,42 @@ def rescale(v_vals, stiffness, mode):
     return v_list
 
 
+def rescale_file(results, stiffness, mode):
+    mode = mode
+    sig = 1
+    eps = zeros(3)
+    eps[0] = 1*stiffness
+    eps[1] = 1
+    eps[2] = 1*stiffness
+    mass = 2
+    red_mass = 1
+    if mode == "stiffer_lj":
+        per_opt = (2.0*pi*sig/(6.0*2.**(1./3)))*(red_mass/(0.5*eps[0]+eps[1]))**0.5
+    elif mode == "triple_back":
+        per_opt = (2.0*pi*sig/(6.0*2.**(1./3)))*(red_mass/(0.5*eps[0]/3.+eps[1]))**0.5
+    speed_of_sound = 6.0*(2.*1/mass)**0.5
+    lattice_const = sig*2.0**(1./6.0) * 2 * sin(70.5)
+    t_vel = lattice_const/per_opt
+
+    true_per_opt = 1/15.56e12
+    true_lattice_const = 5.43e-10
+    true_t_vel = true_lattice_const/true_per_opt
+
+    # true_speed_of_sound = 8433
+    # raleigh_fraction = 0.5
+    # raleigh_speed = raleigh_fraction * true_speed_of_sound
+    raleigh_speed = 4680
+    pull_velocity_ratio = 0.25
+
+    new_results = {}
+    for v in list(results.keys()):
+        true_v = float(v) * (true_t_vel/t_vel)
+        new_results[str(true_v/raleigh_speed)] = results[v]
+
+    return new_results
+
+
+
 #
 # combine_results(["Old\\1200_triple_aco.json", "Old\\300_triple_f0.1.json", "Old\\300_triple_f0.2.json", "Old\\300_triple_f0.3.json",
 #                  "Old\\300_triple_f0.4.json", "Old\\300_triple_mix.json", "Old\\300_triple_f0.6.json",
@@ -200,7 +244,6 @@ def rescale(v_vals, stiffness, mode):
 # combine_results(["cold_s1.2.json", "cold_s1.1.json"])
 
 
-#combine_runs(["Results\\300_s1.1_mix.json", "Results\\300_s1.1_mix_ext.json"])
-combine_results(["Results\\300_s1.1_mix.json", "Results\\300_s1.2_mix.json"])
+#combine_runs(["Results\\300_s1.1_aco.json", "Results\\300_s1.1_aco_more.json"])
+combine_results(["300_s1.1_mix.json", "600_s1.1_mix.json"])
 
-#"E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\300_0.1_test.json"

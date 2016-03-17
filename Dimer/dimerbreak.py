@@ -185,7 +185,6 @@ class DimerBreak:
         dt = self.frac_tim * period            # time step as fraction of the period of a LJ dimer
 
         works = []
-        en_mask = 0
         ekin_total_list = []
         epot_total_list = []
         for i_sample in range(0, self.nconfig):
@@ -289,6 +288,8 @@ class DimerBreak:
 
             ekin_total = 0
             epot_total = 0
+
+            en_mask = 0
 
             for i in range(1, nstep):
 
