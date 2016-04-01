@@ -2,19 +2,19 @@ from Dimer.dimerbreak import DimerBreak
 import matplotlib.pyplot as plt
 import json, statistics
 
-results_temp = "t.json"
+results_temp = "cold_s1.01.json"
 
-v_start = 0.1
+v_start = 0.005
 v = v_start
 v_max = 0.3
-v_inc = 0.01
+v_inc = 0.001
 
 # Setting temperature. Using E = kBT, E = 2.3eV, kB = 8.62e-5eVK-1
 
 e_si_si = 2.3
 kB = 8.62e-5
 
-T = 600
+T = 0.0000001
 
 e_av = (kB * T)/e_si_si
 optical_fraction = 1
@@ -24,11 +24,11 @@ f_opt = e_av * optical_fraction
 f_aco = e_av * acoustic_fraction
 
 f_timestep = 0.002
-f_stiffness = 1.1
+f_stiffness = 1.01
 
 run_info = (v, v_max, v_inc)
 
-nconfig = 5
+nconfig = 1
 
 v_list = []
 w_means = []

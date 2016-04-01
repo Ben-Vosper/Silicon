@@ -58,7 +58,9 @@ def combine_results(filename_list):
     param_string = "Approximate Temperature = " + str(T_approx) + "K" + "\nopt = " + str(format(f_opt, ".3g")) +\
                "\naco = " + str(format(f_aco, ".3g"))
     plt.title(param_string, loc="left", fontsize=12)
-    plt.legend(handles=patches, title="Temp / K", loc="upper left", fontsize=12)
+    plt.legend(handles=patches, title="Temperature / K", loc="upper left", fontsize=12)
+    plt.ylim(-0.05)
+    plt.tight_layout()
     plt.show()
 
 
@@ -178,8 +180,8 @@ def rescale(v_vals, stiffness, mode):
     elif mode == "triple_back":
         per_opt = (2.0*pi*sig/(6.0*2.**(1./3)))*(red_mass/(0.5*eps[0]/3.+eps[1]))**0.5
     speed_of_sound = 6.0*(2.*1/mass)**0.5
-    lattice_const = sig*2.0**(1./6.0) * 2 * sin(70.5)
-    t_vel = lattice_const/per_opt
+    lattice_const = sig * 2.0 ** (1. / 6.0) * 4 * sin(70.5)
+    t_vel = (lattice_const/per_opt)
 
     true_per_opt = 1/15.56e12
     true_lattice_const = 5.43e-10
@@ -193,7 +195,7 @@ def rescale(v_vals, stiffness, mode):
 
     v_list = []
     for v in v_vals:
-        true_v = float(v) * (true_t_vel/t_vel)
+        true_v = float(v) * speed_of_sound * (true_t_vel/t_vel)
         v_list.append(true_v/raleigh_speed)
 
     return v_list
