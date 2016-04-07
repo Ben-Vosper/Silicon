@@ -79,7 +79,7 @@ def rescale(v_vals, stiffness, mode):
     elif mode == "triple_back":
         per_opt = (2.0*pi*sig/(6.0*2.**(1./3)))*(red_mass/(0.5*eps[0]/3.+eps[1]))**0.5
     speed_of_sound = 6.0*(2.*1/mass)**0.5
-    lattice_const = sig*2.0**(1./6.0) * 4 * sin(70.5)
+    lattice_const = sig*2.0**(1./6.0) * (4/(2**0.5)) * sin(70.5)
     t_vel = (lattice_const/per_opt)
 
     true_per_opt = 1/15.56e12
@@ -103,4 +103,4 @@ def rescale(v_vals, stiffness, mode):
     return v_list
 
 #read_full_results("E:\\Ben Vosper\\My Documents\\Silicon\\Dimer_3\\cold_v3_vel_drift.json")
-read_full_results("cold_s1.01.json")
+read_full_results("Results\\150_triple_s1.1_opt.json")

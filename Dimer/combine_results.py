@@ -2,12 +2,13 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import json, colorsys, numpy, statistics
 from pylab import *
+from scipy.ndimage import convolve1d
 
 
 def combine_results(filename_list):
 
     patches = []
-    custom_names = ["300", "600"]
+    custom_names = ["300", "600", "1.20"]
 
     colours = []
     colour_offset = 0.07
@@ -60,6 +61,87 @@ def combine_results(filename_list):
     plt.title(param_string, loc="left", fontsize=12)
     plt.legend(handles=patches, title="Temperature / K", loc="upper left", fontsize=12)
     plt.ylim(-0.05)
+    plt.tight_layout()
+    plt.show()
+
+
+def combine_results_subplots(filename_list):
+
+    patches = []
+    custom_names = ["0", "300", "600"]
+
+    x_data = []
+    y_data = []
+    y_err_data = []
+    maxes = []
+
+    colours = []
+    colour_offset = 0.07
+    n = len(filename_list)
+    for q in range(n):
+        z = colour_offset + q / n
+        c = colorsys.hls_to_rgb(z, 0.5, 1)
+        colours.append(c)
+
+    for name in filename_list:
+
+        i = filename_list.index(name)
+
+        v_list = []
+        w_means = []
+        w_errbar_size = []
+
+        with open(name, 'r') as q:
+            results = json.load(q)
+
+        f_stiffness = results["params"][6]
+
+        if i == 0:
+            nconfig = results["params"][7]
+            f_aco = results["params"][5]
+            f_opt = results["params"][4]
+            T_approx = round(max([f_aco, f_opt]) / 3.747e-5)
+
+        v_vals = list(results.keys())
+        v_vals.remove("params")
+
+        rescaled_v_vals = rescale(v_vals, f_stiffness, "stiffer_lj")
+        # rescaled_v_vals = v_vals
+
+        for v in sorted(v_vals):
+            v_list.append(rescaled_v_vals[v_vals.index(v)])
+            w_means.append(results[v][0])
+            w_errbar_size.append(results[v][1] / (results[v][2] ** 0.5))
+
+        patches.append(mpatches.Patch(color=colours[i], label=custom_names[i]))
+
+        # w_means = moving_average(w_means, 5)
+        # w_errbar_size = moving_average(w_errbar_size, 5)
+
+        x_data.append(v_list)
+        y_data.append(w_means)
+        y_err_data.append(w_errbar_size)
+        maxes.append(find_maximums(v_list, moving_average(w_means, 6)))
+
+    f, axarr = plt.subplots(len(filename_list), sharex=True)
+
+    for i in range(len(filename_list)):
+        axarr[i].errorbar(x_data[i], y_data[i], yerr=y_err_data[i], ls="none", marker="+", color=colours[i])
+        axarr[i].set_title(custom_names[i])
+        axarr[i].set_ylim(-0.05, max(y_data[i]))
+        axarr[i].set_xlim(0, 0.3)
+        axarr[i].set_ylabel("$\\bar W$ / $\epsilon$", size=18)
+        for q in range(len(maxes[i])):
+            axarr[i].plot((maxes[i][q][0], maxes[i][q][0]), axarr[i].get_ylim())
+
+    plt.xlabel("$\\frac{v}{v_R}$", size=24)
+
+    # param_string = "Approximate Temperature = " + str(T_approx) + "K" + "\nopt = " + str(format(f_opt, ".3g")) +\
+    #                "\naco = " + str(format(f_aco, ".3g")) + "\nStiffness = " + str(f_stiffness)
+    # param_string = "Approximate Temperature = " + str(T_approx) + "K" + "\nopt = " + str(format(f_opt, ".3g")) +\
+    #            "\naco = " + str(format(f_aco, ".3g"))
+    # plt.title(param_string, loc="left", fontsize=12)
+    # plt.legend(handles=patches, title="Temperature / K", loc="upper left", fontsize=12)
     plt.tight_layout()
     plt.show()
 
@@ -180,7 +262,7 @@ def rescale(v_vals, stiffness, mode):
     elif mode == "triple_back":
         per_opt = (2.0*pi*sig/(6.0*2.**(1./3)))*(red_mass/(0.5*eps[0]/3.+eps[1]))**0.5
     speed_of_sound = 6.0*(2.*1/mass)**0.5
-    lattice_const = sig * 2.0 ** (1. / 6.0) * 4 * sin(70.5)
+    lattice_const = sig * 2.0 ** (1. / 6.0) * (4/(2**0.5)) * sin(70.5)
     t_vel = (lattice_const/per_opt)
 
     true_per_opt = 1/15.56e12
@@ -215,7 +297,7 @@ def rescale_file(results, stiffness, mode):
     elif mode == "triple_back":
         per_opt = (2.0*pi*sig/(6.0*2.**(1./3)))*(red_mass/(0.5*eps[0]/3.+eps[1]))**0.5
     speed_of_sound = 6.0*(2.*1/mass)**0.5
-    lattice_const = sig*2.0**(1./6.0) * 2 * sin(70.5)
+    lattice_const = sig*2.0**(1./6.0) * (4/(2**0.5)) * sin(70.5)
     t_vel = lattice_const/per_opt
 
     true_per_opt = 1/15.56e12
@@ -230,10 +312,33 @@ def rescale_file(results, stiffness, mode):
 
     new_results = {}
     for v in list(results.keys()):
-        true_v = float(v) * (true_t_vel/t_vel)
+        true_v = float(v) * speed_of_sound * (true_t_vel/t_vel)
         new_results[str(true_v/raleigh_speed)] = results[v]
 
     return new_results
+
+
+def moving_average(data, window_size):
+
+    kernel = (1/window_size)*numpy.ones(window_size)
+    means = convolve1d(data, kernel, mode="nearest")
+
+    return means
+
+
+def find_maximums(data_x, data_y):
+    v = []
+    pos = []
+    for i in range(1, len(data_y) - 1):
+        current = data_y[i]
+        prev = data_y[i - 1]
+        next = data_y[i + 1]
+
+        if current != 0 and next != 0 and prev !=0:
+            if current > prev and current > next:
+                v.append(data_x[i])
+                pos.append(data_y[i])
+    return v, pos
 
 
 
@@ -247,5 +352,6 @@ def rescale_file(results, stiffness, mode):
 
 
 #combine_runs(["Results\\300_s1.1_aco.json", "Results\\300_s1.1_aco_more.json"])
+#combine_results_subplots(["Results\\cold_s1.1.json", "300_s1.1_mix.json", "600_s1.1_mix.json"])
 combine_results(["300_s1.1_mix.json", "600_s1.1_mix.json"])
 
